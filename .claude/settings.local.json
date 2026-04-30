@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install *)",
+      "Bash(mongod --version)",
+      "Bash(docker --version)",
+      "PowerShell(Get-Service *)",
+      "PowerShell(Get-Process *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git push *)"
+    ]
+  }
+}
