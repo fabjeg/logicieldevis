@@ -124,17 +124,17 @@ export default function DevisForm() {
   };
 
   return (
-    <div className="p-6 max-w-4xl space-y-5">
+    <div className="p-4 md:p-6 max-w-4xl space-y-4">
       <h1 className="text-xl font-semibold text-gray-900">
         {isEdit ? 'Modifier le devis' : 'Nouveau devis'}
       </h1>
 
-      <form onSubmit={handleSubmit} className="space-y-5">
+      <form onSubmit={handleSubmit} className="space-y-4">
         {/* Infos générales */}
-        <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-4">
+        <div className="bg-white rounded-xl border border-gray-200 p-4 md:p-5 space-y-4">
           <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Informations</h2>
-          <div className="grid grid-cols-3 gap-4">
-            <div className="col-span-2">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="sm:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-1">Client *</label>
               <select required value={form.clientId} onChange={setField('clientId')} className={`w-full ${cls}`}>
                 <option value="">Sélectionner un client…</option>
@@ -154,7 +154,7 @@ export default function DevisForm() {
               </select>
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Date d'expiration</label>
               <input type="date" value={form.dateExpiration} onChange={setField('dateExpiration')} className={`w-full ${cls}`} />
@@ -164,14 +164,57 @@ export default function DevisForm() {
 
         {/* Lignes */}
         <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-          <div className="px-5 py-3 border-b border-gray-100 flex items-center justify-between">
+          <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
             <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Lignes</h2>
             <button type="button" onClick={ajouterLigne} className="text-sm text-indigo-600 hover:text-indigo-800 font-medium">
-              + Ajouter une ligne
+              + Ajouter
             </button>
           </div>
 
-          <table className="w-full text-sm">
+          {/* Mobile: cartes par ligne */}
+          <div className="sm:hidden divide-y divide-gray-100">
+            {form.lignes.map((l, i) => {
+              const totalLigne = (Number(l.quantite) || 0) * (Number(l.prixUnitaireHT) || 0);
+              const inputCls = 'w-full border border-gray-200 rounded px-2 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-400';
+              return (
+                <div key={i} className="p-4 space-y-3">
+                  <div className="flex items-start gap-2">
+                    <input
+                      required
+                      value={l.description}
+                      onChange={setLigne(i, 'description')}
+                      placeholder="Description du produit / service"
+                      className={`flex-1 ${inputCls}`}
+                    />
+                    {form.lignes.length > 1 && (
+                      <button type="button" onClick={() => supprimerLigne(i)}
+                        className="text-red-400 hover:text-red-600 text-xl leading-none mt-1 w-7 h-7 flex items-center justify-center flex-shrink-0">
+                        ×
+                      </button>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-3 gap-2">
+                    <div>
+                      <label className="text-xs text-gray-400 mb-0.5 block">Qté</label>
+                      <input type="number" min="0" step="0.01" value={l.quantite} onChange={setLigne(i, 'quantite')} className={`${inputCls} text-right`} />
+                    </div>
+                    <div>
+                      <label className="text-xs text-gray-400 mb-0.5 block">PU HT (€)</label>
+                      <input type="number" min="0" step="0.01" value={l.prixUnitaireHT} onChange={setLigne(i, 'prixUnitaireHT')} className={`${inputCls} text-right`} />
+                    </div>
+                    <div>
+                      <label className="text-xs text-gray-400 mb-0.5 block">TVA %</label>
+                      <input type="number" min="0" max="100" step="0.1" value={l.tauxTVA} onChange={setLigne(i, 'tauxTVA')} className={`${inputCls} text-right`} />
+                    </div>
+                  </div>
+                  <p className="text-right text-sm font-medium text-gray-700">Total HT : {euros(totalLigne)}</p>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Desktop: tableau */}
+          <table className="hidden sm:table w-full text-sm">
             <thead>
               <tr className="text-xs text-gray-400 bg-gray-50 border-b border-gray-100">
                 <th className="text-left px-4 py-2">Description</th>
@@ -224,8 +267,8 @@ export default function DevisForm() {
           </table>
 
           {/* Totaux */}
-          <div className="flex justify-end px-5 py-4 border-t border-gray-100 bg-gray-50">
-            <div className="space-y-1.5 text-sm w-64">
+          <div className="flex justify-end px-4 py-4 border-t border-gray-100 bg-gray-50">
+            <div className="space-y-1.5 text-sm w-full sm:w-64">
               <div className="flex justify-between text-gray-500">
                 <span>Total HT</span>
                 <span className="font-medium text-gray-800">{euros(totaux.totalHT)}</span>
@@ -261,7 +304,7 @@ export default function DevisForm() {
         </div>
 
         {/* Notes & conditions */}
-        <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-4">
+        <div className="bg-white rounded-xl border border-gray-200 p-4 md:p-5 space-y-4">
           <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Notes & Conditions</h2>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
@@ -278,11 +321,11 @@ export default function DevisForm() {
 
         <div className="flex gap-3">
           <button type="submit" disabled={loading}
-            className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-medium px-5 py-2 rounded-lg text-sm">
+            className="flex-1 sm:flex-none bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-medium px-5 py-2.5 rounded-lg text-sm">
             {loading ? 'Enregistrement…' : isEdit ? 'Enregistrer' : 'Créer le devis'}
           </button>
           <button type="button" onClick={() => navigate('/devis')}
-            className="px-5 py-2 text-sm text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50">
+            className="flex-1 sm:flex-none px-5 py-2.5 text-sm text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50">
             Annuler
           </button>
         </div>

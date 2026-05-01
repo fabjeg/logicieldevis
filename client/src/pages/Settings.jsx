@@ -89,7 +89,7 @@ export default function Settings() {
   };
 
   return (
-    <div className="p-6 max-w-2xl space-y-5">
+    <div className="p-4 md:p-6 max-w-2xl space-y-5">
       <h1 className="text-xl font-semibold text-gray-900">Paramètres</h1>
 
       {/* ── Entreprise ── */}
@@ -98,7 +98,7 @@ export default function Settings() {
           <Field label="Nom de l'entreprise">
             <input className={cls} value={form.entreprise.nom} onChange={setEnt('nom')} />
           </Field>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Field label="Email">
               <input type="email" className={cls} value={form.entreprise.email} onChange={setEnt('email')} />
             </Field>
@@ -114,11 +114,11 @@ export default function Settings() {
             <Field label="Rue">
               <input className={cls} value={form.entreprise.adresse.rue} onChange={setAddr('rue')} />
             </Field>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               <Field label="Code postal">
                 <input className={cls} value={form.entreprise.adresse.codePostal} onChange={setAddr('codePostal')} />
               </Field>
-              <div className="col-span-2">
+              <div className="col-span-1 sm:col-span-2">
                 <Field label="Ville">
                   <input className={cls} value={form.entreprise.adresse.ville} onChange={setAddr('ville')} />
                 </Field>
@@ -144,7 +144,7 @@ export default function Settings() {
 
         {/* ── Numérotation ── */}
         <Section title="Numérotation des devis">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Field label="Préfixe" hint={`Exemple : DEV → DEV-2026-001`}>
               <input className={cls} value={form.prefixeNumero}
                 onChange={(e) => setForm((f) => ({ ...f, prefixeNumero: e.target.value.toUpperCase() }))}

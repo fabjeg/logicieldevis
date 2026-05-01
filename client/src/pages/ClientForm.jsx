@@ -57,13 +57,13 @@ export default function ClientForm() {
   };
 
   return (
-    <div className="p-6 max-w-2xl">
+    <div className="p-4 md:p-6 max-w-2xl">
       <h1 className="text-xl font-semibold text-gray-900 mb-6">
         {isEdit ? 'Modifier le client' : 'Nouveau client'}
       </h1>
 
-      <form onSubmit={handleSubmit} className="space-y-5">
-        <div className="grid grid-cols-2 gap-4">
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Field label="Prénom *">
             <input required className={cls} value={form.prenom} onChange={set('prenom')} />
           </Field>
@@ -76,7 +76,7 @@ export default function ClientForm() {
           <input className={cls} value={form.entreprise} onChange={set('entreprise')} />
         </Field>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Field label="Email *">
             <input required type="email" className={cls} value={form.email} onChange={set('email')} />
           </Field>
@@ -91,11 +91,11 @@ export default function ClientForm() {
             <Field label="Rue">
               <input className={cls} value={form.adresse.rue} onChange={setAddr('rue')} />
             </Field>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               <Field label="Code postal">
                 <input className={cls} value={form.adresse.codePostal} onChange={setAddr('codePostal')} />
               </Field>
-              <div className="col-span-2">
+              <div className="col-span-1 sm:col-span-2">
                 <Field label="Ville">
                   <input className={cls} value={form.adresse.ville} onChange={setAddr('ville')} />
                 </Field>
@@ -111,14 +111,14 @@ export default function ClientForm() {
           <button
             type="submit"
             disabled={loading}
-            className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-medium px-5 py-2 rounded-lg text-sm"
+            className="flex-1 sm:flex-none bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-medium px-5 py-2.5 rounded-lg text-sm"
           >
             {loading ? 'Enregistrement…' : isEdit ? 'Enregistrer' : 'Créer le client'}
           </button>
           <button
             type="button"
             onClick={() => navigate('/clients')}
-            className="px-5 py-2 text-sm text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50"
+            className="flex-1 sm:flex-none px-5 py-2.5 text-sm text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50"
           >
             Annuler
           </button>
