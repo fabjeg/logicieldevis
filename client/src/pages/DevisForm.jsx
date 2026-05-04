@@ -311,9 +311,9 @@ export default function DevisForm() {
           <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Notes & Conditions</h2>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
-            <textarea rows={3} value={form.notes} onChange={setField('notes')}
+            <textarea rows={8} value={form.notes} onChange={setField('notes')}
               placeholder="Informations complémentaires visibles sur le PDF…"
-              className={`w-full ${cls} resize-none`} />
+              className={`w-full ${cls} resize-y`} />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Conditions générales</label>
