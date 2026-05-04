@@ -179,12 +179,13 @@ export default function DevisForm() {
               return (
                 <div key={i} className="p-4 space-y-3">
                   <div className="flex items-start gap-2">
-                    <input
+                    <textarea
                       required
+                      rows={2}
                       value={l.description}
                       onChange={setLigne(i, 'description')}
                       placeholder="Description du produit / service"
-                      className={`flex-1 ${inputCls}`}
+                      className={`flex-1 resize-y ${inputCls}`}
                     />
                     {form.lignes.length > 1 && (
                       <button type="button" onClick={() => supprimerLigne(i)}
@@ -231,12 +232,13 @@ export default function DevisForm() {
                 return (
                   <tr key={i} className="border-b border-gray-50">
                     <td className="px-4 py-2">
-                      <input
+                      <textarea
                         required
+                        rows={2}
                         value={l.description}
                         onChange={setLigne(i, 'description')}
                         placeholder="Description du produit / service"
-                        className="w-full border border-gray-200 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-400"
+                        className="w-full border border-gray-200 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-400 resize-y"
                       />
                     </td>
                     <td className="px-2 py-2">

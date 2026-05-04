@@ -8,7 +8,12 @@
       "PowerShell(Get-Process *)",
       "Bash(git add *)",
       "Bash(git commit *)",
-      "Bash(git push *)"
+      "Bash(git push *)",
+      "Bash(rtk git *)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\fabie\\\\Documents\\\\logicieldevis\" -Force)",
+      "Bash(Select-Object Name, PSIsContainer)",
+      "Bash(Format-Table -AutoSize)",
+      "Bash(node *)"
     ]
   }
 }

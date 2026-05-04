@@ -13,7 +13,9 @@ const BOTTOM_LIMIT = PAGE_H - 80;
 const COL = { num: 50, desc: 75, qty: 305, pu: 360, tva: 430, total: 490 };
 
 function euros(n) {
-  return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(n || 0);
+  return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' })
+    .format(n || 0)
+    .replace(/[  ]/g, ' ');
 }
 
 function datesFR(d) {
@@ -100,8 +102,12 @@ function genererPDF(devis, settings, stream) {
 
   let ligneIndex = 0;
   for (const ligne of devis.lignes) {
-    // Saut de page si nécessaire (garde 20px + hauteur ligne)
-    if (y + 20 > BOTTOM_LIMIT) {
+    const descText = ligne.description || '';
+    doc.fontSize(8.5).font('Helvetica');
+    const descHeight = doc.heightOfString(descText, { width: 225 });
+    const rowHeight = Math.max(20, descHeight + 12);
+
+    if (y + rowHeight > BOTTOM_LIMIT) {
       doc.addPage();
       y = MARGIN;
       y = dessinerEnteteTableau(doc, y);
@@ -110,16 +116,16 @@ function genererPDF(devis, settings, stream) {
     const bg = ligneIndex % 2 === 0 ? '#ffffff' : LIGHT_GRAY;
     const totalLigne = (ligne.quantite || 0) * (ligne.prixUnitaireHT || 0);
 
-    doc.rect(MARGIN, y, USABLE_W, 20).fill(bg);
-    doc.fontSize(8.5).font('Helvetica').fillColor('#111827');
+    doc.rect(MARGIN, y, USABLE_W, rowHeight).fill(bg);
+    doc.fillColor('#111827');
     doc.text(String(ligneIndex + 1), COL.num, y + 6, { width: 20, align: 'center' });
-    doc.text(ligne.description || '', COL.desc, y + 6, { width: 225 });
+    doc.text(descText, COL.desc, y + 6, { width: 225 });
     doc.text(String(ligne.quantite ?? ''), COL.qty, y + 6, { width: 50, align: 'right' });
     doc.text(euros(ligne.prixUnitaireHT), COL.pu, y + 6, { width: 65, align: 'right' });
     doc.text(`${ligne.tauxTVA ?? 20} %`, COL.tva, y + 6, { width: 50, align: 'right' });
     doc.text(euros(totalLigne), COL.total, y + 6, { width: 55, align: 'right' });
 
-    y += 20;
+    y += rowHeight;
     ligneIndex++;
   }
 
