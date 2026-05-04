@@ -12,6 +12,7 @@ const adresseSchema = new Schema(
 
 const clientSchema = new Schema(
   {
+    userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
     nom: { type: String, required: true, trim: true },
     prenom: { type: String, required: true, trim: true },
     entreprise: { type: String, trim: true, default: '' },

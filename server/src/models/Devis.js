@@ -24,6 +24,7 @@ const ligneSchema = new Schema(
 
 const devisSchema = new Schema(
   {
+    userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
     numero: { type: String, unique: true, sparse: true },
     client: { type: Schema.Types.ObjectId, ref: 'Client', required: true },
     snapshotClient: { type: snapshotClientSchema },
@@ -60,12 +61,12 @@ function calculerTotaux(lignes) {
   };
 }
 
-async function genererNumero(prefixe = 'DEV') {
+async function genererNumero(prefixe = 'DEV', userId) {
   const annee = new Date().getFullYear();
   const pattern = `${prefixe}-${annee}-`;
 
   const dernier = await model('Devis')
-    .findOne({ numero: { $regex: `^${pattern.replace('-', '\\-')}` } })
+    .findOne({ userId, numero: { $regex: `^${pattern.replace('-', '\\-')}` } })
     .sort({ numero: -1 })
     .select('numero')
     .lean();
@@ -84,7 +85,7 @@ devisSchema.pre('save', async function (next) {
   if (!this.numero && sortDuBrouillon) {
     const Settings = require('./Settings');
     const settings = await Settings.getSingleton();
-    this.numero = await genererNumero(settings.prefixeNumero || 'DEV');
+    this.numero = await genererNumero(settings.prefixeNumero || 'DEV', this.userId);
   }
 
   if (this.isModified('lignes') || this.isNew) {

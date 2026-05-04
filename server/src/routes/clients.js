@@ -4,7 +4,8 @@ const Client = require('../models/Client');
 router.get('/', async (req, res) => {
   try {
     const { q, page = 1, limit = 20 } = req.query;
-    const filter = q ? { $text: { $search: q } } : {};
+    const filter = { userId: req.user.id };
+    if (q) filter.$text = { $search: q };
     const [clients, total] = await Promise.all([
       Client.find(filter)
         .sort({ createdAt: -1 })
@@ -20,7 +21,7 @@ router.get('/', async (req, res) => {
 
 router.post('/', async (req, res) => {
   try {
-    const client = await Client.create(req.body);
+    const client = await Client.create({ ...req.body, userId: req.user.id });
     res.status(201).json(client);
   } catch (err) {
     res.status(400).json({ message: err.message });
@@ -29,7 +30,7 @@ router.post('/', async (req, res) => {
 
 router.get('/:id', async (req, res) => {
   try {
-    const client = await Client.findById(req.params.id);
+    const client = await Client.findOne({ _id: req.params.id, userId: req.user.id });
     if (!client) return res.status(404).json({ message: 'Client introuvable' });
     res.json(client);
   } catch (err) {
@@ -39,10 +40,11 @@ router.get('/:id', async (req, res) => {
 
 router.put('/:id', async (req, res) => {
   try {
-    const client = await Client.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-    });
+    const client = await Client.findOneAndUpdate(
+      { _id: req.params.id, userId: req.user.id },
+      req.body,
+      { new: true, runValidators: true }
+    );
     if (!client) return res.status(404).json({ message: 'Client introuvable' });
     res.json(client);
   } catch (err) {
@@ -52,7 +54,7 @@ router.put('/:id', async (req, res) => {
 
 router.delete('/:id', async (req, res) => {
   try {
-    const client = await Client.findByIdAndDelete(req.params.id);
+    const client = await Client.findOneAndDelete({ _id: req.params.id, userId: req.user.id });
     if (!client) return res.status(404).json({ message: 'Client introuvable' });
     res.json({ message: 'Client supprimé' });
   } catch (err) {

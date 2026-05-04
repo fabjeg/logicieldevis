@@ -7,7 +7,9 @@ const { genererPDF } = require('../utils/pdfGenerator');
 // ── Stats dashboard ──────────────────────────────────────────────────────────
 router.get('/stats', async (req, res) => {
   try {
+    const uid = req.user.id;
     const parStatut = await Devis.aggregate([
+      { $match: { userId: require('mongoose').Types.ObjectId.createFromHexString(uid) } },
       { $group: { _id: '$statut', count: { $sum: 1 }, totalTTC: { $sum: '$totalTTC' } } },
     ]);
 
@@ -17,7 +19,13 @@ router.get('/stats', async (req, res) => {
     douzeAvant.setHours(0, 0, 0, 0);
 
     const caMensuel = await Devis.aggregate([
-      { $match: { statut: 'accepté', dateCreation: { $gte: douzeAvant } } },
+      {
+        $match: {
+          userId: require('mongoose').Types.ObjectId.createFromHexString(uid),
+          statut: 'accepté',
+          dateCreation: { $gte: douzeAvant },
+        },
+      },
       {
         $group: {
           _id: { annee: { $year: '$dateCreation' }, mois: { $month: '$dateCreation' } },
@@ -38,7 +46,7 @@ router.get('/stats', async (req, res) => {
 router.get('/', async (req, res) => {
   try {
     const { statut, clientId, q, page = 1, limit = 20 } = req.query;
-    const filter = {};
+    const filter = { userId: req.user.id };
     if (statut) filter.statut = statut;
     if (clientId) filter.client = clientId;
     if (q) {
@@ -71,7 +79,7 @@ router.post('/', async (req, res) => {
   try {
     const { clientId, dateExpiration, statut, lignes, notes, conditionsGenerales, acompte } = req.body;
 
-    const client = await Client.findById(clientId);
+    const client = await Client.findOne({ _id: clientId, userId: req.user.id });
     if (!client) return res.status(404).json({ message: 'Client introuvable' });
 
     const snapshotClient = {
@@ -84,6 +92,7 @@ router.post('/', async (req, res) => {
     };
 
     const devis = await Devis.create({
+      userId: req.user.id,
       client: clientId,
       snapshotClient,
       dateExpiration: dateExpiration || null,
@@ -103,10 +112,11 @@ router.post('/', async (req, res) => {
 // ── Dupliquer ────────────────────────────────────────────────────────────────
 router.post('/:id/dupliquer', async (req, res) => {
   try {
-    const original = await Devis.findById(req.params.id);
+    const original = await Devis.findOne({ _id: req.params.id, userId: req.user.id });
     if (!original) return res.status(404).json({ message: 'Devis introuvable' });
 
     const copie = await Devis.create({
+      userId: req.user.id,
       client: original.client,
       snapshotClient: original.snapshotClient,
       dateExpiration: null,
@@ -125,7 +135,7 @@ router.post('/:id/dupliquer', async (req, res) => {
 // ── Détail ───────────────────────────────────────────────────────────────────
 router.get('/:id', async (req, res) => {
   try {
-    const devis = await Devis.findById(req.params.id).populate('client');
+    const devis = await Devis.findOne({ _id: req.params.id, userId: req.user.id }).populate('client');
     if (!devis) return res.status(404).json({ message: 'Devis introuvable' });
     res.json(devis);
   } catch (err) {
@@ -136,13 +146,13 @@ router.get('/:id', async (req, res) => {
 // ── Modifier ─────────────────────────────────────────────────────────────────
 router.put('/:id', async (req, res) => {
   try {
-    const devis = await Devis.findById(req.params.id);
+    const devis = await Devis.findOne({ _id: req.params.id, userId: req.user.id });
     if (!devis) return res.status(404).json({ message: 'Devis introuvable' });
 
     const { clientId, dateExpiration, statut, lignes, notes, conditionsGenerales, acompte } = req.body;
 
     if (clientId && String(clientId) !== String(devis.client)) {
-      const client = await Client.findById(clientId);
+      const client = await Client.findOne({ _id: clientId, userId: req.user.id });
       if (!client) return res.status(404).json({ message: 'Client introuvable' });
       devis.client = clientId;
       devis.snapshotClient = {
@@ -169,7 +179,7 @@ router.put('/:id', async (req, res) => {
 // ── Supprimer ────────────────────────────────────────────────────────────────
 router.delete('/:id', async (req, res) => {
   try {
-    const devis = await Devis.findByIdAndDelete(req.params.id);
+    const devis = await Devis.findOneAndDelete({ _id: req.params.id, userId: req.user.id });
     if (!devis) return res.status(404).json({ message: 'Devis introuvable' });
     res.json({ message: 'Devis supprimé' });
   } catch (err) {
@@ -181,7 +191,7 @@ router.delete('/:id', async (req, res) => {
 router.get('/:id/pdf', async (req, res) => {
   try {
     const [devis, settings] = await Promise.all([
-      Devis.findById(req.params.id),
+      Devis.findOne({ _id: req.params.id, userId: req.user.id }),
       Settings.getSingleton(),
     ]);
     if (!devis) return res.status(404).json({ message: 'Devis introuvable' });
