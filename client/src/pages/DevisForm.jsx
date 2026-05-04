@@ -4,6 +4,7 @@ import api from '../services/api';
 import { useToast } from '../context/ToastContext';
 
 const LIGNE_VIDE = { description: '', quantite: 1, prixUnitaireHT: 0, tauxTVA: 20 };
+const NOTES_DEFAUT = `travaux effectué en CESU.\nà titre indicatif:\nsalaire net versé au salarié: 690€\nCotisations sociales prélevées à l'employeur: 547.04€\nAvantage fiscal pour l'employeur: 618.52€\nCoût réel pour l'employeur: 618.52€\nsur la mains d'œuvre`;
 const STATUTS = ['brouillon', 'envoyé', 'accepté', 'refusé'];
 
 const euros = (n) =>
@@ -25,7 +26,7 @@ export default function DevisForm() {
     dateExpiration: '',
     statut: 'brouillon',
     lignes: [{ ...LIGNE_VIDE }],
-    notes: '',
+    notes: NOTES_DEFAUT,
     conditionsGenerales: '',
     acompte: 0,
   });
