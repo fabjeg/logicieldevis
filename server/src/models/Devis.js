@@ -25,7 +25,7 @@ const ligneSchema = new Schema(
 const devisSchema = new Schema(
   {
     userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
-    numero: { type: String, unique: true, sparse: true },
+    numero: { type: String },
     client: { type: Schema.Types.ObjectId, ref: 'Client', required: true },
     snapshotClient: { type: snapshotClientSchema },
     dateCreation: { type: Date, default: Date.now },
@@ -98,6 +98,10 @@ devisSchema.pre('save', async function (next) {
   next();
 });
 
+devisSchema.index(
+  { userId: 1, numero: 1 },
+  { unique: true, partialFilterExpression: { numero: { $type: 'string' } } }
+);
 devisSchema.index({ statut: 1 });
 devisSchema.index({ dateCreation: -1 });
 devisSchema.index({ client: 1 });
