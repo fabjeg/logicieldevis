@@ -18,6 +18,7 @@ const ligneSchema = new Schema(
     quantite: { type: Number, required: true, min: 0 },
     prixUnitaireHT: { type: Number, required: true, min: 0 },
     tauxTVA: { type: Number, required: true, default: 20, min: 0, max: 100 },
+    prixProHT: { type: Number, default: 0, min: 0 },
   },
   { _id: false }
 );
@@ -84,7 +85,7 @@ devisSchema.pre('save', async function (next) {
   const sortDuBrouillon = this.isModified('statut') && this.statut !== 'brouillon';
   if (!this.numero && sortDuBrouillon) {
     const Settings = require('./Settings');
-    const settings = await Settings.getSingleton();
+    const settings = await Settings.getForUser(this.userId);
     this.numero = await genererNumero(settings.prefixeNumero || 'DEV', this.userId);
   }
 

@@ -192,7 +192,7 @@ router.get('/:id/pdf', async (req, res) => {
   try {
     const [devis, settings] = await Promise.all([
       Devis.findOne({ _id: req.params.id, userId: req.user.id }),
-      Settings.getSingleton(),
+      Settings.getForUser(req.user.id),
     ]);
     if (!devis) return res.status(404).json({ message: 'Devis introuvable' });
 

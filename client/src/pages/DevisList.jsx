@@ -211,6 +211,7 @@ export default function DevisList() {
                   <button onClick={() => setPreview({ id: d._id, numero: d.numero })} className="text-gray-400 hover:text-gray-700">Aperçu</button>
                   <button onClick={() => telechargerPDF(d._id, d.numero)} className="text-gray-400 hover:text-gray-700">PDF</button>
                   <button onClick={() => dupliquer(d)} className="text-gray-500 hover:text-gray-800">Dupliquer</button>
+                  <button onClick={() => navigate(`/devis/${d._id}/prix-pro`)} className="text-emerald-600 hover:text-emerald-800">Prix pro</button>
                   <button onClick={() => navigate(`/devis/${d._id}/modifier`)} className="text-indigo-600 font-medium">Modifier</button>
                   <button onClick={() => supprimer(d)} className="text-red-500">Supprimer</button>
                 </div>
@@ -295,6 +296,7 @@ export default function DevisList() {
                         <button onClick={() => setPreview({ id: d._id, numero: d.numero })} className="text-gray-400 hover:text-gray-700 text-xs">Aperçu</button>
                         <button onClick={() => telechargerPDF(d._id, d.numero)} className="text-gray-400 hover:text-gray-700 text-xs">PDF</button>
                         <button onClick={() => dupliquer(d)} className="text-gray-500 hover:text-gray-800 text-xs">Dupliquer</button>
+                        <button onClick={() => navigate(`/devis/${d._id}/prix-pro`)} className="text-emerald-600 hover:text-emerald-800 text-xs">Prix pro</button>
                         <button onClick={() => navigate(`/devis/${d._id}/modifier`)} className="text-indigo-600 hover:underline text-xs">Modifier</button>
                         <button onClick={() => supprimer(d)} className="text-red-500 hover:underline text-xs">Supprimer</button>
                       </td>

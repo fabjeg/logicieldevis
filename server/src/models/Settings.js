@@ -2,7 +2,7 @@ const { Schema, model } = require('mongoose');
 
 const settingsSchema = new Schema(
   {
-    _singleton: { type: Boolean, default: true, unique: true },
+    userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, unique: true, index: true },
     entreprise: {
       nom: { type: String, default: '' },
       adresse: {
@@ -24,9 +24,9 @@ const settingsSchema = new Schema(
   { timestamps: true }
 );
 
-settingsSchema.statics.getSingleton = async function () {
-  let doc = await this.findOne({ _singleton: true });
-  if (!doc) doc = await this.create({ _singleton: true });
+settingsSchema.statics.getForUser = async function (userId) {
+  let doc = await this.findOne({ userId });
+  if (!doc) doc = await this.create({ userId });
   return doc;
 };
 
