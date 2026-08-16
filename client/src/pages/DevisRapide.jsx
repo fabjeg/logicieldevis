@@ -4,7 +4,7 @@ import { useToast } from '../context/ToastContext';
 
 const LIGNE_VIDE = { description: '', quantite: 1, prixUnitaireHT: 0 };
 const CLIENT_VIDE = { prenom: '', nom: '', entreprise: '', email: '', telephone: '' };
-const NOTES_DEFAUT = `travaux effectué en CESU.\nà titre indicatif:\nsalaire net versé au salarié: 690€\nCotisations sociales prélevées à l'employeur: 547.04€\nAvantage fiscal pour l'employeur: 618.52€\nCoût réel pour l'employeur: 618.52€\nsur la mains d'œuvre`;
+const NOTES_DEFAUT = '';
 const TVA_DEFAUT = 20;
 
 const euros = (n) =>

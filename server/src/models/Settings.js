@@ -19,7 +19,6 @@ const settingsSchema = new Schema(
     mentionsLegalesDefaut: { type: String, default: '' },
     prefixeNumero: { type: String, default: 'DEV' },
     delaiExpirationDefaut: { type: Number, default: 30 },
-    adminPasswordHash: { type: String, default: '' },
   },
   { timestamps: true }
 );

@@ -63,22 +63,17 @@ function calculerTotaux(lignes) {
 }
 
 async function genererNumero(prefixe = 'DEV', userId) {
+  const Counter = require('./Counter');
   const annee = new Date().getFullYear();
-  const pattern = `${prefixe}-${annee}-`;
+  const cle = `devis-${userId}-${annee}`;
 
-  const dernier = await model('Devis')
-    .findOne({ userId, numero: { $regex: `^${pattern.replace('-', '\\-')}` } })
-    .sort({ numero: -1 })
-    .select('numero')
-    .lean();
+  const compteur = await Counter.findOneAndUpdate(
+    { _id: cle },
+    { $inc: { seq: 1 } },
+    { upsert: true, new: true }
+  );
 
-  let seq = 1;
-  if (dernier) {
-    const parts = dernier.numero.split('-');
-    seq = parseInt(parts[parts.length - 1], 10) + 1;
-  }
-
-  return `${pattern}${String(seq).padStart(3, '0')}`;
+  return `${prefixe}-${annee}-${String(compteur.seq).padStart(3, '0')}`;
 }
 
 devisSchema.pre('save', async function (next) {

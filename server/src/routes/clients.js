@@ -40,9 +40,10 @@ router.get('/:id', async (req, res) => {
 
 router.put('/:id', async (req, res) => {
   try {
+    const { nom, prenom, entreprise, email, telephone, adresse } = req.body;
     const client = await Client.findOneAndUpdate(
       { _id: req.params.id, userId: req.user.id },
-      req.body,
+      { nom, prenom, entreprise, email, telephone, adresse },
       { new: true, runValidators: true }
     );
     if (!client) return res.status(404).json({ message: 'Client introuvable' });

@@ -3,6 +3,10 @@ const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
 
+if (!process.env.JWT_SECRET) {
+  throw new Error("JWT_SECRET est requis (variable d'environnement manquante)");
+}
+
 const app = express();
 
 app.use(cors({ origin: true, credentials: true }));

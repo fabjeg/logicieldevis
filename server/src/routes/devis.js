@@ -124,6 +124,7 @@ router.post('/:id/dupliquer', async (req, res) => {
       lignes: original.lignes,
       notes: original.notes,
       conditionsGenerales: original.conditionsGenerales,
+      acompte: original.acompte,
     });
 
     res.status(201).json(copie);
