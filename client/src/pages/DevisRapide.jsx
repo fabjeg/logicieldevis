@@ -10,8 +10,13 @@ const TVA_DEFAUT = 20;
 const euros = (n) =>
   new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(n || 0);
 
-const cls =
-  'w-full border border-gray-300 rounded-lg px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-indigo-500';
+const fieldCard = 'block bg-surface rounded-field px-4 py-2.5 shadow-soft';
+const labelCls = 'block text-[11px] font-semibold uppercase tracking-wide text-muted mb-1';
+const inputCls = 'w-full bg-transparent border-0 p-0 text-[15px] text-ink placeholder:text-faint focus:outline-none focus:ring-0';
+const chipField = 'bg-page rounded-[12px] px-3 py-2';
+const chipLabel = 'block text-[10px] font-semibold uppercase tracking-wide text-muted mb-0.5';
+const chipInput = 'w-full bg-transparent border-0 p-0 text-[15px] text-ink text-right focus:outline-none';
+const sectionLabel = 'px-1 text-[11px] font-bold uppercase tracking-wide text-muted';
 
 export default function DevisRapide() {
   const toast = useToast();
@@ -135,27 +140,28 @@ export default function DevisRapide() {
   };
 
   return (
-    <div className="p-4 md:p-6 max-w-2xl space-y-4">
-      <div>
-        <h1 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
-          <span>⚡</span> Devis rapide
+    <div className="p-4 space-y-5">
+      <div className="px-1 pt-1">
+        <h1 className="text-[22px] font-extrabold tracking-tightest text-ink flex items-center gap-2">
+          <span className="text-accent">⚡</span> Devis rapide
         </h1>
-        <p className="text-sm text-gray-500 mt-0.5">
-          Créez un brouillon en quelques secondes chez le client. Vous compléterez les détails (dates, notes…) plus tard depuis « Modifier ».
+        <p className="text-sm text-muted mt-0.5">
+          Créez un brouillon en quelques secondes chez le client. Les détails (dates, notes…) se complètent plus tard.
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-5">
         {/* Client */}
-        <div className="bg-white rounded-xl border border-gray-200 p-4 md:p-5 space-y-3">
-          <div className="grid grid-cols-2 gap-2">
+        <div className="space-y-3">
+          <p className={sectionLabel}>Client</p>
+
+          {/* Segmented control */}
+          <div className="bg-surface rounded-field shadow-soft p-1 flex gap-1">
             <button
               type="button"
               onClick={() => setClientMode('nouveau')}
-              className={`py-2.5 rounded-lg text-sm font-medium border ${
-                clientMode === 'nouveau'
-                  ? 'bg-indigo-600 text-white border-indigo-600'
-                  : 'bg-white text-gray-600 border-gray-300'
+              className={`flex-1 py-2.5 rounded-[12px] text-sm font-semibold transition-colors ${
+                clientMode === 'nouveau' ? 'bg-accent text-white' : 'text-muted'
               }`}
             >
               Nouveau client
@@ -163,10 +169,8 @@ export default function DevisRapide() {
             <button
               type="button"
               onClick={() => setClientMode('existant')}
-              className={`py-2.5 rounded-lg text-sm font-medium border ${
-                clientMode === 'existant'
-                  ? 'bg-indigo-600 text-white border-indigo-600'
-                  : 'bg-white text-gray-600 border-gray-300'
+              className={`flex-1 py-2.5 rounded-[12px] text-sm font-semibold transition-colors ${
+                clientMode === 'existant' ? 'bg-accent text-white' : 'text-muted'
               }`}
             >
               Client existant
@@ -174,86 +178,84 @@ export default function DevisRapide() {
           </div>
 
           {clientMode === 'nouveau' ? (
-            <div className="space-y-3 pt-1">
+            <div className="space-y-3">
               <div className="grid grid-cols-2 gap-3">
-                <input
-                  required
-                  placeholder="Prénom *"
-                  className={cls}
-                  value={nouveauClient.prenom}
-                  onChange={(e) => setNouveauClient((c) => ({ ...c, prenom: e.target.value }))}
-                />
-                <input
-                  required
-                  placeholder="Nom *"
-                  className={cls}
-                  value={nouveauClient.nom}
-                  onChange={(e) => setNouveauClient((c) => ({ ...c, nom: e.target.value }))}
-                />
+                <label className={fieldCard}>
+                  <span className={labelCls}>Prénom *</span>
+                  <input required className={inputCls} value={nouveauClient.prenom}
+                    onChange={(e) => setNouveauClient((c) => ({ ...c, prenom: e.target.value }))} />
+                </label>
+                <label className={fieldCard}>
+                  <span className={labelCls}>Nom *</span>
+                  <input required className={inputCls} value={nouveauClient.nom}
+                    onChange={(e) => setNouveauClient((c) => ({ ...c, nom: e.target.value }))} />
+                </label>
               </div>
-              <input
-                type="tel"
-                placeholder="Téléphone"
-                className={cls}
-                value={nouveauClient.telephone}
-                onChange={(e) => setNouveauClient((c) => ({ ...c, telephone: e.target.value }))}
-              />
-              <input
-                required
-                type="email"
-                placeholder="Email *"
-                className={cls}
-                value={nouveauClient.email}
-                onChange={(e) => setNouveauClient((c) => ({ ...c, email: e.target.value }))}
-              />
-              <input
-                placeholder="Entreprise (optionnel)"
-                className={cls}
-                value={nouveauClient.entreprise}
-                onChange={(e) => setNouveauClient((c) => ({ ...c, entreprise: e.target.value }))}
-              />
+              <label className={fieldCard}>
+                <span className={labelCls}>Téléphone</span>
+                <input type="tel" className={inputCls} value={nouveauClient.telephone}
+                  onChange={(e) => setNouveauClient((c) => ({ ...c, telephone: e.target.value }))} />
+              </label>
+              <label className={fieldCard}>
+                <span className={labelCls}>Email *</span>
+                <input required type="email" className={inputCls} value={nouveauClient.email}
+                  onChange={(e) => setNouveauClient((c) => ({ ...c, email: e.target.value }))} />
+              </label>
+              <label className={fieldCard}>
+                <span className={labelCls}>Entreprise (optionnel)</span>
+                <input className={inputCls} value={nouveauClient.entreprise}
+                  onChange={(e) => setNouveauClient((c) => ({ ...c, entreprise: e.target.value }))} />
+              </label>
             </div>
           ) : clientSelectionne ? (
-            <div className="flex items-center justify-between bg-indigo-50 rounded-lg px-3 py-2.5">
-              <div>
-                <p className="text-sm font-medium text-gray-800">
+            <div className="bg-surface rounded-field shadow-soft flex items-center gap-3 px-4 py-3">
+              <div className="w-9 h-9 rounded-chip bg-accent-soft text-accent flex items-center justify-center text-xs font-bold flex-shrink-0">
+                {(clientSelectionne.prenom[0] || '') + (clientSelectionne.nom[0] || '')}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-semibold text-ink truncate">
                   {clientSelectionne.prenom} {clientSelectionne.nom}
                 </p>
-                <p className="text-xs text-gray-500">{clientSelectionne.email}</p>
+                <p className="text-xs text-muted truncate">{clientSelectionne.email}</p>
               </div>
               <button
                 type="button"
                 onClick={() => { setClientSelectionne(null); setSearch(''); }}
-                className="text-xs text-indigo-600 hover:underline flex-shrink-0"
+                className="text-xs font-semibold text-accent flex-shrink-0"
               >
                 Changer
               </button>
             </div>
           ) : (
-            <div className="relative pt-1">
-              <input
-                type="search"
-                placeholder="Rechercher par nom, email…"
-                className={cls}
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
+            <div className="relative">
+              <div className="relative">
+                <svg className="absolute left-4 top-1/2 -translate-y-1/2 text-faint" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <circle cx="11" cy="11" r="7" /><path d="m20 20-3-3" />
+                </svg>
+                <input
+                  type="search"
+                  placeholder="Rechercher par nom, email…"
+                  className="w-full bg-surface rounded-field pl-11 pr-4 py-3 text-sm text-ink placeholder:text-faint shadow-soft focus:outline-none focus:ring-2 focus:ring-accent/40"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
+              </div>
               {search.trim().length >= 2 && (
-                <div className="mt-1 border border-gray-200 rounded-lg divide-y divide-gray-100 overflow-hidden max-h-56 overflow-y-auto">
+                <div className="mt-2 bg-surface rounded-field shadow-soft overflow-hidden divide-y divide-page max-h-56 overflow-y-auto">
                   {recherche ? (
-                    <p className="px-3 py-2.5 text-sm text-gray-400">Recherche…</p>
+                    <p className="px-4 py-3 text-sm text-muted">Recherche…</p>
                   ) : resultats.length === 0 ? (
-                    <p className="px-3 py-2.5 text-sm text-gray-400">Aucun client trouvé</p>
+                    <p className="px-4 py-3 text-sm text-muted">Aucun client trouvé</p>
                   ) : (
                     resultats.map((c) => (
                       <button
                         type="button"
                         key={c._id}
                         onClick={() => { setClientSelectionne(c); setSearch(''); setResultats([]); }}
-                        className="w-full text-left px-3 py-2.5 text-sm hover:bg-gray-50"
+                        className="w-full text-left px-4 py-3 text-sm hover:bg-page"
                       >
-                        <span className="font-medium text-gray-800">{c.prenom} {c.nom}</span>
-                        {c.entreprise && <span className="text-gray-400"> · {c.entreprise}</span>}
+                        <span className="font-semibold text-ink">{c.prenom} {c.nom}</span>
+                        {c.entreprise && <span className="text-muted"> · {c.entreprise}</span>}
                       </button>
                     ))
                   )}
@@ -263,55 +265,62 @@ export default function DevisRapide() {
           )}
         </div>
 
-        {/* Lignes */}
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-          <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
-            <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Prestations</h2>
-            <button type="button" onClick={ajouterLigne} className="text-sm text-indigo-600 hover:text-indigo-800 font-medium">
+        {/* Prestations */}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between px-1">
+            <p className={sectionLabel}>Prestations</p>
+            <button type="button" onClick={ajouterLigne} className="text-sm font-semibold text-accent">
               + Ajouter
             </button>
           </div>
-          <div className="divide-y divide-gray-100">
-            {lignes.map((l, i) => (
-              <div key={i} className="p-4 space-y-2.5">
-                <div className="flex items-start gap-2">
-                  <textarea
-                    rows={2}
-                    placeholder="Description de la prestation"
-                    value={l.description}
-                    onChange={setLigne(i, 'description')}
-                    className={`flex-1 resize-y ${cls}`}
-                  />
-                  {lignes.length > 1 && (
-                    <button type="button" onClick={() => supprimerLigne(i)}
-                      className="text-red-400 hover:text-red-600 text-xl leading-none mt-1 w-8 h-8 flex items-center justify-center flex-shrink-0">
-                      ×
-                    </button>
-                  )}
+
+          {lignes.map((l, i) => (
+            <div key={i} className="bg-surface rounded-card shadow-soft p-4 space-y-3">
+              <div className="flex items-start gap-2">
+                <textarea
+                  rows={2}
+                  placeholder="Description de la prestation"
+                  value={l.description}
+                  onChange={setLigne(i, 'description')}
+                  className="flex-1 resize-y bg-transparent border-0 p-0 text-[15px] text-ink placeholder:text-faint focus:outline-none"
+                />
+                {lignes.length > 1 && (
+                  <button type="button" onClick={() => supprimerLigne(i)}
+                    className="text-faint hover:text-danger text-xl leading-none w-8 h-8 flex items-center justify-center flex-shrink-0">
+                    ×
+                  </button>
+                )}
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className={chipField}>
+                  <span className={chipLabel}>Quantité</span>
+                  <input type="number" inputMode="decimal" min="0" step="0.01" value={l.quantite}
+                    onChange={setLigne(i, 'quantite')} className={chipInput} />
                 </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="text-xs text-gray-400 mb-0.5 block">Quantité</label>
-                    <input type="number" inputMode="decimal" min="0" step="0.01" value={l.quantite}
-                      onChange={setLigne(i, 'quantite')} className={`${cls} text-right`} />
-                  </div>
-                  <div>
-                    <label className="text-xs text-gray-400 mb-0.5 block">Prix unitaire HT (€)</label>
-                    <input type="number" inputMode="decimal" min="0" step="0.01" value={l.prixUnitaireHT}
-                      onChange={setLigne(i, 'prixUnitaireHT')} className={`${cls} text-right`} />
-                  </div>
+                <div className={chipField}>
+                  <span className={chipLabel}>Prix unitaire HT (€)</span>
+                  <input type="number" inputMode="decimal" min="0" step="0.01" value={l.prixUnitaireHT}
+                    onChange={setLigne(i, 'prixUnitaireHT')} className={chipInput} />
                 </div>
               </div>
-            ))}
+            </div>
+          ))}
+        </div>
+
+        {/* Totaux */}
+        <div className="bg-surface rounded-card shadow-soft p-4 space-y-2">
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-muted">Total HT</span>
+            <span className="font-semibold text-ink tnum">{euros(totaux.totalHT)}</span>
           </div>
-          <div className="flex justify-end px-4 py-3 border-t border-gray-100 bg-gray-50 text-sm space-x-4">
-            <span className="text-gray-500">Total HT <strong className="text-gray-800">{euros(totaux.totalHT)}</strong></span>
-            <span className="text-gray-400">≈ TTC (TVA {TVA_DEFAUT}%) <strong className="text-gray-600">{euros(totaux.totalTTC)}</strong></span>
+          <div className="flex items-center justify-between pt-2 border-t border-page">
+            <span className="text-sm font-semibold text-ink">≈ Total TTC <span className="text-muted font-normal">(TVA {TVA_DEFAUT}%)</span></span>
+            <span className="text-lg font-extrabold text-accent tnum">{euros(totaux.totalTTC)}</span>
           </div>
         </div>
 
         <button type="submit" disabled={saving}
-          className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-semibold py-3.5 rounded-lg text-base">
+          className="w-full bg-accent-gradient text-white font-semibold py-3.5 rounded-field shadow-fab active:scale-[0.99] transition-transform disabled:opacity-50">
           {saving ? 'Enregistrement…' : 'Enregistrer le brouillon'}
         </button>
       </form>

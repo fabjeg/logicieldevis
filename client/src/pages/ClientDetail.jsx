@@ -49,16 +49,16 @@ export default function ClientDetail() {
 
   if (loading) {
     return (
-      <div className="p-6 space-y-4">
+      <div className="p-4 space-y-4">
         {[1, 2, 3].map((i) => (
-          <div key={i} className="h-20 bg-gray-100 rounded-xl animate-pulse" />
+          <div key={i} className="h-24 bg-surface rounded-card shadow-soft animate-pulse" />
         ))}
       </div>
     );
   }
 
   if (!client) {
-    return <div className="p-6 text-red-500">Client introuvable.</div>;
+    return <div className="p-6 text-danger">Client introuvable.</div>;
   }
 
   const totalCA = devis
@@ -69,138 +69,105 @@ export default function ClientDetail() {
   const addrLigne = [addr.rue, [addr.codePostal, addr.ville].filter(Boolean).join(' ')]
     .filter(Boolean)
     .join(', ');
+  const initiales = ((client.prenom?.[0] || '') + (client.nom?.[0] || '')).toUpperCase();
 
   return (
-    <div className="p-6 max-w-3xl space-y-5">
+    <div className="p-4 space-y-5">
       {Modal}
 
-      {/* Fil d'Ariane */}
-      <div className="flex items-center gap-1.5 text-sm text-gray-400">
-        <Link to="/clients" className="hover:text-gray-600">Clients</Link>
-        <span>›</span>
-        <span className="text-gray-700 font-medium">{client.prenom} {client.nom}</span>
-      </div>
+      {/* Retour */}
+      <Link to="/clients" className="inline-flex items-center gap-1 text-sm text-muted px-1">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6" /></svg>
+        Clients
+      </Link>
 
-      {/* Fiche client */}
-      <div className="bg-white rounded-xl border border-gray-200 p-5">
-        <div className="flex items-start justify-between gap-4 flex-wrap">
-          <div>
-            <h1 className="text-xl font-semibold text-gray-900">
-              {client.prenom} {client.nom}
-            </h1>
-            {client.entreprise && (
-              <p className="text-gray-500 text-sm mt-0.5">{client.entreprise}</p>
-            )}
-          </div>
-          <div className="flex gap-2 flex-wrap">
-            <Link
-              to={`/devis/nouveau?clientId=${client._id}`}
-              className="text-sm px-3 py-1.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-medium"
-            >
-              + Nouveau devis
-            </Link>
-            <button
-              onClick={() => navigate(`/clients/${id}/modifier`)}
-              className="text-sm px-3 py-1.5 border border-gray-300 rounded-lg hover:bg-gray-50 text-gray-700 font-medium"
-            >
-              Modifier
-            </button>
-            <button
-              onClick={supprimerClient}
-              className="text-sm px-3 py-1.5 border border-red-200 text-red-500 rounded-lg hover:bg-red-50 font-medium"
-            >
-              Supprimer
-            </button>
-          </div>
+      {/* Carte contact */}
+      <div className="bg-surface rounded-card shadow-soft p-6 flex flex-col items-center text-center">
+        <div className="w-14 h-14 rounded-[18px] bg-accent-soft text-accent flex items-center justify-center text-lg font-extrabold">
+          {initiales || '—'}
+        </div>
+        <h1 className="mt-3 text-lg font-extrabold tracking-tightest text-ink">
+          {client.prenom} {client.nom}
+        </h1>
+        {client.entreprise && <p className="text-sm text-muted mt-0.5">{client.entreprise}</p>}
+
+        {/* Coordonnées */}
+        <div className="w-full mt-4 space-y-1 text-sm">
+          <p className="text-ink">{client.email}</p>
+          <p className="text-muted">{client.telephone || '—'}</p>
+          {addrLigne && <p className="text-muted">{addrLigne}</p>}
         </div>
 
-        <div className="grid grid-cols-2 gap-x-8 gap-y-3 mt-5 text-sm">
-          <Info label="Email" value={client.email} />
-          <Info label="Téléphone" value={client.telephone || '—'} />
-          {addrLigne && <Info label="Adresse" value={addrLigne} className="col-span-2" />}
+        {/* Actions rapides */}
+        <div className="w-full mt-5 grid grid-cols-3 gap-2">
+          <Link
+            to={`/devis/nouveau?clientId=${client._id}`}
+            className="flex flex-col items-center gap-1 py-2.5 rounded-field bg-accent-soft text-accent text-xs font-semibold"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M12 5v14M5 12h14" /></svg>
+            Devis
+          </Link>
+          <button
+            onClick={() => navigate(`/clients/${id}/modifier`)}
+            className="flex flex-col items-center gap-1 py-2.5 rounded-field bg-page text-ink text-xs font-semibold"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" /></svg>
+            Modifier
+          </button>
+          <button
+            onClick={supprimerClient}
+            className="flex flex-col items-center gap-1 py-2.5 rounded-field bg-danger-soft text-danger text-xs font-semibold"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6" /></svg>
+            Suppr.
+          </button>
         </div>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-4">
-        <StatCard value={devis.length} label="Devis au total" />
-        <StatCard
-          value={devis.filter((d) => d.statut === 'accepté').length}
-          label="Acceptés"
-          color="text-green-600"
-        />
-        <StatCard value={euros(totalCA)} label="CA accepté" />
+      <div className="grid grid-cols-3 gap-3">
+        <StatCard value={devis.length} label="Devis" />
+        <StatCard value={devis.filter((d) => d.statut === 'accepté').length} label="Acceptés" color="text-success" />
+        <StatCard value={euros(totalCA)} label="CA accepté" small />
       </div>
 
       {/* Historique */}
-      <div className="bg-white rounded-xl border border-gray-200">
-        <div className="px-5 py-3.5 border-b border-gray-100">
-          <h2 className="text-sm font-semibold text-gray-700">Historique des devis</h2>
-        </div>
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="text-xs text-gray-400 border-b border-gray-100 bg-gray-50">
-              <th className="text-left px-4 py-2">N°</th>
-              <th className="text-left px-4 py-2">Date</th>
-              <th className="text-left px-4 py-2">Expiration</th>
-              <th className="text-right px-4 py-2">Total TTC</th>
-              <th className="text-left px-4 py-2">Statut</th>
-              <th className="px-4 py-2" />
-            </tr>
-          </thead>
-          <tbody>
-            {devis.length === 0 ? (
-              <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-gray-400">
-                  Aucun devis pour ce client
-                </td>
-              </tr>
-            ) : (
-              devis.map((d) => (
-                <tr key={d._id} className="border-b border-gray-50 hover:bg-gray-50">
-                  <td className="px-4 py-3 font-mono text-xs text-gray-500">
-                    {d.numero || <span className="text-gray-300">—</span>}
-                  </td>
-                  <td className="px-4 py-3 text-gray-500">{datesFR(d.dateCreation)}</td>
-                  <td className="px-4 py-3 text-gray-500">{datesFR(d.dateExpiration)}</td>
-                  <td className="px-4 py-3 text-right font-medium text-gray-800">
-                    {euros(d.totalTTC)}
-                  </td>
-                  <td className="px-4 py-3">
-                    <StatutBadge statut={d.statut} />
-                  </td>
-                  <td className="px-4 py-3 text-right">
-                    <Link
-                      to={`/devis/${d._id}/modifier`}
-                      className="text-indigo-600 hover:underline text-xs"
-                    >
-                      Ouvrir
-                    </Link>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+      <div className="space-y-3">
+        <p className="px-1 text-[11px] font-bold uppercase tracking-wide text-muted">Historique des devis</p>
+        {devis.length === 0 ? (
+          <div className="bg-surface rounded-card shadow-soft py-12 text-center text-muted text-sm">
+            Aucun devis pour ce client
+          </div>
+        ) : (
+          devis.map((d) => (
+            <div
+              key={d._id}
+              onClick={() => navigate(`/devis/${d._id}/modifier`)}
+              className="bg-surface rounded-card shadow-soft p-4 flex items-center gap-3 cursor-pointer"
+            >
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-semibold text-ink truncate">{d.numero || 'Brouillon'}</p>
+                <p className="text-xs text-muted">
+                  {datesFR(d.dateCreation)} · exp. {datesFR(d.dateExpiration)}
+                </p>
+              </div>
+              <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                <span className="text-sm font-bold text-ink tnum">{euros(d.totalTTC)}</span>
+                <StatutBadge statut={d.statut} />
+              </div>
+            </div>
+          ))
+        )}
       </div>
     </div>
   );
 }
 
-function Info({ label, value, className = '' }) {
+function StatCard({ value, label, color = 'text-ink', small = false }) {
   return (
-    <div className={className}>
-      <p className="text-xs text-gray-400 mb-0.5">{label}</p>
-      <p className="text-gray-800">{value}</p>
-    </div>
-  );
-}
-
-function StatCard({ value, label, color = 'text-gray-900' }) {
-  return (
-    <div className="bg-white rounded-xl border border-gray-200 p-4 text-center">
-      <p className={`text-2xl font-bold ${color}`}>{value}</p>
-      <p className="text-xs text-gray-400 mt-0.5">{label}</p>
+    <div className="bg-surface rounded-[18px] shadow-soft p-4 text-center">
+      <p className={`${small ? 'text-sm' : 'text-2xl'} font-extrabold tnum ${color}`}>{value}</p>
+      <p className="text-[11px] text-muted mt-0.5">{label}</p>
     </div>
   );
 }

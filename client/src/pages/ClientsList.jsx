@@ -1,8 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { useConfirm } from '../components/ConfirmModal';
 import { useToast } from '../context/ToastContext';
+
+const initiales = (prenom, nom) =>
+  ((prenom?.[0] || '') + (nom?.[0] || '')).toUpperCase() || '—';
 
 export default function ClientsList() {
   const navigate = useNavigate();
@@ -52,118 +55,92 @@ export default function ClientsList() {
   const totalPages = Math.ceil(total / LIMIT);
 
   return (
-    <div className="p-4 md:p-6 space-y-4">
+    <div className="p-4 space-y-4">
       {Modal}
 
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold text-gray-900">Clients ({total})</h1>
-        <Link
-          to="/clients/nouveau"
-          className="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-4 py-2 rounded-lg"
-        >
-          + Nouveau
-        </Link>
+      {/* En-tête */}
+      <div className="px-1 pt-1">
+        <h1 className="text-[22px] font-extrabold tracking-tightest text-ink">Clients</h1>
+        <p className="text-sm text-muted mt-0.5">{total} au total</p>
       </div>
 
-      <input
-        type="search"
-        placeholder="Rechercher par nom, entreprise, email…"
-        value={search}
-        onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-      />
+      {/* Recherche */}
+      <div className="relative">
+        <svg className="absolute left-4 top-1/2 -translate-y-1/2 text-faint" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+          <circle cx="11" cy="11" r="7" /><path d="m20 20-3-3" />
+        </svg>
+        <input
+          type="search"
+          placeholder="Rechercher par nom, entreprise, email…"
+          value={search}
+          onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+          className="w-full bg-surface rounded-field pl-11 pr-4 py-3 text-sm text-ink placeholder:text-faint shadow-soft focus:outline-none focus:ring-2 focus:ring-accent/40"
+        />
+      </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-        {/* Mobile: cartes */}
-        <div className="sm:hidden divide-y divide-gray-100">
-          {loading ? (
-            Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="px-4 py-3 space-y-1.5">
-                <div className="h-4 bg-gray-100 rounded animate-pulse w-1/2" />
-                <div className="h-3 bg-gray-100 rounded animate-pulse w-3/4" />
-              </div>
-            ))
-          ) : clients.length === 0 ? (
-            <p className="px-4 py-10 text-center text-gray-400 text-sm">Aucun client trouvé</p>
-          ) : clients.map((c) => (
-            <div key={c._id} className="px-4 py-3 flex items-center justify-between gap-2">
-              <div className="min-w-0">
-                <Link to={`/clients/${c._id}`} className="font-medium text-gray-800 hover:text-indigo-600 block truncate">
-                  {c.prenom} {c.nom}
-                </Link>
-                <p className="text-xs text-gray-400 truncate">
-                  {[c.entreprise, c.telephone || c.email].filter(Boolean).join(' · ')}
-                </p>
-              </div>
-              <div className="flex gap-3 flex-shrink-0">
-                <button onClick={() => navigate(`/clients/${c._id}/modifier`)} className="text-indigo-600 text-sm">Modifier</button>
-                <button onClick={() => supprimer(c)} className="text-red-500 text-sm">Suppr.</button>
+      {/* Liste */}
+      <div className="space-y-3">
+        {loading ? (
+          Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="bg-surface rounded-card shadow-soft p-4 flex items-center gap-3">
+              <div className="w-9 h-9 rounded-chip bg-page animate-pulse" />
+              <div className="flex-1 space-y-2">
+                <div className="h-3.5 bg-page rounded animate-pulse w-1/2" />
+                <div className="h-3 bg-page rounded animate-pulse w-2/3" />
               </div>
             </div>
-          ))}
-        </div>
-
-        {/* Desktop: tableau */}
-        <div className="hidden sm:block overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="text-xs text-gray-400 border-b border-gray-100 bg-gray-50">
-                <th className="text-left px-4 py-3">Nom</th>
-                <th className="text-left px-4 py-3">Entreprise</th>
-                <th className="text-left px-4 py-3">Email</th>
-                <th className="text-left px-4 py-3">Téléphone</th>
-                <th className="text-left px-4 py-3">Ville</th>
-                <th className="px-4 py-3" />
-              </tr>
-            </thead>
-            <tbody>
-              {loading ? (
-                Array.from({ length: 5 }).map((_, i) => (
-                  <tr key={i}>
-                    {Array.from({ length: 6 }).map((__, j) => (
-                      <td key={j} className="px-4 py-3">
-                        <div className="h-4 bg-gray-100 rounded animate-pulse" />
-                      </td>
-                    ))}
-                  </tr>
-                ))
-              ) : clients.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="px-4 py-10 text-center text-gray-400">
-                    Aucun client trouvé
-                  </td>
-                </tr>
-              ) : (
-                clients.map((c) => (
-                  <tr key={c._id} className="border-b border-gray-50 hover:bg-gray-50">
-                    <td className="px-4 py-3">
-                      <Link to={`/clients/${c._id}`} className="font-medium text-gray-800 hover:text-indigo-600">
-                        {c.prenom} {c.nom}
-                      </Link>
-                    </td>
-                    <td className="px-4 py-3 text-gray-500">{c.entreprise || '—'}</td>
-                    <td className="px-4 py-3 text-gray-500">{c.email}</td>
-                    <td className="px-4 py-3 text-gray-500">{c.telephone || '—'}</td>
-                    <td className="px-4 py-3 text-gray-500">{c.adresse?.ville || '—'}</td>
-                    <td className="px-4 py-3 text-right space-x-2 whitespace-nowrap">
-                      <button onClick={() => navigate(`/clients/${c._id}/modifier`)} className="text-indigo-600 hover:underline text-xs">Modifier</button>
-                      <button onClick={() => supprimer(c)} className="text-red-500 hover:underline text-xs">Supprimer</button>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {totalPages > 1 && (
-          <div className="flex items-center justify-center gap-2 px-4 py-3 border-t border-gray-100">
-            <button disabled={page === 1} onClick={() => setPage((p) => p - 1)} className="px-3 py-2 text-sm rounded border disabled:opacity-40">← Préc.</button>
-            <span className="text-sm text-gray-500">{page} / {totalPages}</span>
-            <button disabled={page === totalPages} onClick={() => setPage((p) => p + 1)} className="px-3 py-2 text-sm rounded border disabled:opacity-40">Suiv. →</button>
+          ))
+        ) : clients.length === 0 ? (
+          <div className="bg-surface rounded-card shadow-soft py-14 text-center text-muted text-sm">
+            Aucun client trouvé
           </div>
+        ) : (
+          clients.map((c) => (
+            <div key={c._id} className="bg-surface rounded-card shadow-soft p-4">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-chip bg-accent-soft text-accent flex items-center justify-center text-xs font-bold flex-shrink-0">
+                  {initiales(c.prenom, c.nom)}
+                </div>
+                <div
+                  className="min-w-0 flex-1 cursor-pointer"
+                  onClick={() => navigate(`/clients/${c._id}`)}
+                >
+                  <p className="text-sm font-semibold text-ink truncate">{c.prenom} {c.nom}</p>
+                  <p className="text-xs text-muted truncate">
+                    {[c.entreprise, c.telephone || c.email].filter(Boolean).join(' · ') || '—'}
+                  </p>
+                </div>
+              </div>
+              <div className="mt-3 pt-3 border-t border-page flex gap-4">
+                <button onClick={() => navigate(`/clients/${c._id}`)} className="text-xs font-medium text-muted hover:opacity-70">Voir</button>
+                <button onClick={() => navigate(`/clients/${c._id}/modifier`)} className="text-xs font-semibold text-accent hover:opacity-70">Modifier</button>
+                <button onClick={() => supprimer(c)} className="text-xs font-medium text-danger hover:opacity-70">Supprimer</button>
+              </div>
+            </div>
+          ))
         )}
       </div>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-3 pt-1">
+          <button
+            disabled={page === 1}
+            onClick={() => setPage((p) => p - 1)}
+            className="px-4 py-2 text-sm font-medium rounded-field bg-surface text-ink shadow-soft disabled:opacity-40"
+          >
+            ← Préc.
+          </button>
+          <span className="text-sm text-muted tnum">{page} / {totalPages}</span>
+          <button
+            disabled={page === totalPages}
+            onClick={() => setPage((p) => p + 1)}
+            className="px-4 py-2 text-sm font-medium rounded-field bg-surface text-ink shadow-soft disabled:opacity-40"
+          >
+            Suiv. →
+          </button>
+        </div>
+      )}
     </div>
   );
 }

@@ -31,25 +31,25 @@ export default function PDFPreviewModal({ devisId, numero, onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl w-full max-w-4xl h-[90vh] flex flex-col shadow-2xl">
+    <div className="fixed inset-0 bg-ink/60 flex items-center justify-center z-50 p-4">
+      <div className="bg-surface rounded-card w-full max-w-4xl h-[90vh] flex flex-col shadow-tab overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-3.5 border-b border-gray-100 flex-shrink-0">
-          <h3 className="font-semibold text-gray-800">
-            Aperçu — <span className="font-mono text-sm">{numero || 'Brouillon'}</span>
+        <div className="flex items-center justify-between px-5 py-3.5 border-b border-page flex-shrink-0">
+          <h3 className="font-bold text-ink">
+            Aperçu — <span className="font-mono text-sm text-muted">{numero || 'Brouillon'}</span>
           </h3>
           <div className="flex items-center gap-2">
             {url && (
               <button
                 onClick={telecharger}
-                className="px-3 py-1.5 text-sm bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium"
+                className="px-4 py-2 text-sm bg-accent-gradient text-white rounded-field font-semibold shadow-fab"
               >
                 Télécharger
               </button>
             )}
             <button
               onClick={onClose}
-              className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-700 text-xl rounded-lg hover:bg-gray-100"
+              className="w-9 h-9 flex items-center justify-center text-muted hover:text-ink text-xl rounded-field hover:bg-page"
             >
               ×
             </button>
@@ -57,15 +57,15 @@ export default function PDFPreviewModal({ devisId, numero, onClose }) {
         </div>
 
         {/* Contenu */}
-        <div className="flex-1 overflow-hidden rounded-b-2xl bg-gray-100">
+        <div className="flex-1 overflow-hidden bg-page">
           {loading && (
-            <div className="h-full flex flex-col items-center justify-center gap-2 text-gray-400 text-sm">
-              <div className="w-6 h-6 border-2 border-gray-300 border-t-indigo-500 rounded-full animate-spin" />
+            <div className="h-full flex flex-col items-center justify-center gap-2 text-muted text-sm">
+              <div className="w-6 h-6 border-2 border-faint border-t-accent rounded-full animate-spin" />
               Génération du PDF…
             </div>
           )}
           {error && (
-            <div className="h-full flex items-center justify-center text-red-500 text-sm">{error}</div>
+            <div className="h-full flex items-center justify-center text-danger text-sm">{error}</div>
           )}
           {url && (
             <iframe src={url} className="w-full h-full border-0" title="Aperçu PDF" />

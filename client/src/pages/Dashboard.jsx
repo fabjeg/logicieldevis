@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import StatutBadge from '../components/StatutBadge';
 
@@ -8,10 +8,14 @@ const MOIS = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', '
 
 const euros = (n) =>
   new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(n || 0);
-
+const eurosCourt = (n) =>
+  n >= 1000 ? `${Math.round(n / 100) / 10} k€` : `${Math.round(n)} €`;
 const datesFR = (d) => (d ? new Date(d).toLocaleDateString('fr-FR') : '—');
+const initiales = (nom) =>
+  (nom || '').split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase() || '—';
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const [stats, setStats] = useState({ parStatut: [], caMensuel: [] });
   const [recents, setRecents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -30,11 +34,12 @@ export default function Dashboard() {
     stats.parStatut.find((x) => x._id === s) || { count: 0, totalTTC: 0 };
 
   const now = new Date();
-  const mois12 = Array.from({ length: 12 }, (_, i) => {
-    const d = new Date(now.getFullYear(), now.getMonth() - 11 + i, 1);
+  // 6 derniers mois
+  const mois6 = Array.from({ length: 6 }, (_, i) => {
+    const d = new Date(now.getFullYear(), now.getMonth() - 5 + i, 1);
     return { annee: d.getFullYear(), mois: d.getMonth() + 1, label: MOIS[d.getMonth()] };
   });
-  const caData = mois12.map((m) => {
+  const caData = mois6.map((m) => {
     const found = stats.caMensuel.find(
       (c) => c._id.annee === m.annee && c._id.mois === m.mois
     );
@@ -43,33 +48,23 @@ export default function Dashboard() {
   const maxCA = Math.max(...caData.map((m) => m.totalTTC), 1);
 
   if (loading) {
-    return (
-      <div className="p-6 text-gray-400 text-sm">Chargement…</div>
-    );
+    return <div className="p-6 text-muted text-sm">Chargement…</div>;
   }
 
   return (
-    <div className="p-4 md:p-6 space-y-5">
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold text-gray-900">Tableau de bord</h1>
-        <Link
-          to="/devis/nouveau"
-          className="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-4 py-2 rounded-lg"
-        >
-          + Nouveau
-        </Link>
-      </div>
+    <div className="p-4 space-y-5">
+      <h1 className="text-[22px] font-extrabold tracking-tightest text-ink px-1 pt-1">Bilan</h1>
 
-      {/* Cartes statuts */}
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      {/* Grille de stats 2×2 */}
+      <div className="grid grid-cols-2 gap-3">
         {STATUTS.map((s) => {
           const d = statByStatus(s);
           return (
-            <div key={s} className="bg-white rounded-xl border border-gray-200 p-4">
+            <div key={s} className="bg-surface rounded-[18px] shadow-soft p-4">
               <StatutBadge statut={s} />
-              <p className="mt-2 text-2xl font-bold text-gray-900">{d.count}</p>
+              <p className="mt-3 text-2xl font-extrabold text-ink tnum">{d.count}</p>
               {s !== 'brouillon' && (
-                <p className="text-xs text-gray-400 mt-0.5">{euros(d.totalTTC)}</p>
+                <p className="text-xs text-muted mt-0.5 tnum">{euros(d.totalTTC)}</p>
               )}
             </div>
           );
@@ -77,93 +72,70 @@ export default function Dashboard() {
       </div>
 
       {/* CA mensuel */}
-      <div className="bg-white rounded-xl border border-gray-200 p-4 md:p-6">
-        <h2 className="text-sm font-semibold text-gray-700 mb-4">CA mensuel accepté (12 derniers mois)</h2>
-        <div className="flex items-end gap-1 h-28 md:h-36">
+      <div className="bg-surface rounded-card shadow-soft p-5">
+        <h2 className="text-sm font-bold text-ink">CA accepté</h2>
+        <p className="text-xs text-muted mb-4">6 derniers mois</p>
+        <div className="flex items-end gap-2 h-32">
           {caData.map((m) => (
-            <div
-              key={`${m.annee}-${m.mois}`}
-              className="flex-1 flex flex-col items-center gap-1"
-              title={euros(m.totalTTC)}
-            >
-              <div
-                className="w-full bg-indigo-500 rounded-t transition-all"
-                style={{
-                  height: `${(m.totalTTC / maxCA) * 112}px`,
-                  minHeight: m.totalTTC > 0 ? '4px' : '0',
-                }}
-              />
-              <span className="text-xs text-gray-400">{m.label}</span>
+            <div key={`${m.annee}-${m.mois}`} className="flex-1 flex flex-col items-center gap-1.5" title={euros(m.totalTTC)}>
+              <span className="text-[9px] font-semibold text-muted tnum h-3">
+                {m.totalTTC > 0 ? eurosCourt(m.totalTTC) : ''}
+              </span>
+              <div className="w-full flex items-end" style={{ height: '84px' }}>
+                <div
+                  className="w-full bg-accent-gradient rounded-t-[8px] transition-all"
+                  style={{
+                    height: `${(m.totalTTC / maxCA) * 84}px`,
+                    minHeight: m.totalTTC > 0 ? '4px' : '2px',
+                    opacity: m.totalTTC > 0 ? 1 : 0.25,
+                  }}
+                />
+              </div>
+              <span className="text-[10px] text-muted">{m.label}</span>
             </div>
           ))}
         </div>
       </div>
 
       {/* Derniers devis */}
-      <div className="bg-white rounded-xl border border-gray-200">
-        <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-gray-700">Derniers devis</h2>
-          <Link to="/devis" className="text-xs text-indigo-600 hover:underline">Voir tout</Link>
+      <div className="space-y-3">
+        <div className="flex items-center justify-between px-1">
+          <p className="text-[11px] font-bold uppercase tracking-wide text-muted">Activité récente</p>
+          <Link to="/devis" className="text-xs font-semibold text-accent">Voir tout</Link>
         </div>
 
-        {/* Mobile: cartes */}
-        <div className="sm:hidden divide-y divide-gray-50">
-          {recents.length === 0 ? (
-            <p className="px-4 py-8 text-center text-gray-400 text-sm">Aucun devis pour l'instant</p>
-          ) : recents.map((d) => (
-            <div key={d._id} className="px-4 py-3 flex items-center justify-between gap-2">
-              <div className="min-w-0">
-                <p className="text-sm font-medium text-gray-800 truncate">
-                  {d.client ? `${d.client.prenom} ${d.client.nom}` : '—'}
-                </p>
-                <p className="text-xs text-gray-400">{d.numero || '—'} · {datesFR(d.dateCreation)}</p>
+        {recents.length === 0 ? (
+          <div className="bg-surface rounded-card shadow-soft py-12 text-center text-muted text-sm">
+            Aucun devis pour l'instant
+          </div>
+        ) : (
+          recents.map((d) => {
+            const nom = d.client
+              ? `${d.client.prenom} ${d.client.nom}`
+              : d.snapshotClient
+              ? `${d.snapshotClient.prenom} ${d.snapshotClient.nom}`
+              : '—';
+            return (
+              <div
+                key={d._id}
+                onClick={() => navigate(`/devis/${d._id}/modifier`)}
+                className="bg-surface rounded-card shadow-soft p-4 flex items-center gap-3 cursor-pointer"
+              >
+                <div className="w-8 h-8 rounded-chip bg-accent-soft text-accent flex items-center justify-center text-xs font-bold flex-shrink-0">
+                  {initiales(nom)}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-semibold text-ink truncate">{nom}</p>
+                  <p className="text-xs text-muted">{d.numero || '—'} · {datesFR(d.dateCreation)}</p>
+                </div>
+                <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                  <span className="text-sm font-bold text-ink tnum">{euros(d.totalTTC)}</span>
+                  <StatutBadge statut={d.statut} />
+                </div>
               </div>
-              <div className="flex flex-col items-end gap-1 flex-shrink-0">
-                <span className="text-sm font-medium text-gray-800">{euros(d.totalTTC)}</span>
-                <StatutBadge statut={d.statut} />
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Desktop: tableau */}
-        <div className="hidden sm:block overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="text-xs text-gray-400 border-b border-gray-100">
-                <th className="text-left px-5 py-3">N°</th>
-                <th className="text-left px-5 py-3">Client</th>
-                <th className="text-left px-5 py-3">Date</th>
-                <th className="text-right px-5 py-3">Total TTC</th>
-                <th className="text-left px-5 py-3">Statut</th>
-              </tr>
-            </thead>
-            <tbody>
-              {recents.map((d) => (
-                <tr key={d._id} className="border-b border-gray-50 hover:bg-gray-50">
-                  <td className="px-5 py-3 font-mono text-xs text-gray-500">
-                    {d.numero || <span className="text-gray-300">—</span>}
-                  </td>
-                  <td className="px-5 py-3 text-gray-700">
-                    {d.client
-                      ? `${d.client.prenom} ${d.client.nom}${d.client.entreprise ? ` · ${d.client.entreprise}` : ''}`
-                      : '—'}
-                  </td>
-                  <td className="px-5 py-3 text-gray-500">{datesFR(d.dateCreation)}</td>
-                  <td className="px-5 py-3 text-right font-medium text-gray-800">{euros(d.totalTTC)}</td>
-                  <td className="px-5 py-3"><StatutBadge statut={d.statut} /></td>
-                </tr>
-              ))}
-              {recents.length === 0 && (
-                <tr>
-                  <td colSpan={5} className="px-5 py-8 text-center text-gray-400 text-sm">
-                    Aucun devis pour l'instant
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+            );
+          })
+        )}
       </div>
     </div>
   );

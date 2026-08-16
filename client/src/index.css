@@ -3,9 +3,26 @@
 @tailwind utilities;
 
 @layer base {
+  html,
+  body,
+  #root {
+    min-height: 100%;
+  }
+
+  body {
+    @apply bg-page text-ink antialiased font-sans;
+  }
+
+  /* Chiffres alignés pour les montants */
+  .tnum {
+    font-variant-numeric: tabular-nums;
+  }
+
   /* Empêche le zoom auto sur iOS pour les inputs (font-size < 16px) */
   @media (max-width: 640px) {
-    input, select, textarea {
+    input,
+    select,
+    textarea {
       font-size: 16px !important;
     }
   }

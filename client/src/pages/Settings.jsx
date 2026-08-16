@@ -1,16 +1,18 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
+import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 
-const cls =
-  'w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500';
+const rowInput = 'w-full bg-transparent border-0 p-0 text-[15px] text-ink text-right placeholder:text-faint focus:outline-none';
+const groupCls = 'bg-surface rounded-[18px] shadow-soft divide-y divide-page overflow-hidden';
+const sectionLabel = 'px-1 mb-2 text-[11px] font-bold uppercase tracking-wide text-muted';
 
-function Field({ label, hint, children }) {
+function Row({ label, children }) {
   return (
-    <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
-      {hint && <p className="text-xs text-gray-400 mb-1">{hint}</p>}
-      {children}
+    <div className="px-4 py-3 flex items-center justify-between gap-3">
+      <span className="text-sm text-ink flex-shrink-0">{label}</span>
+      <div className="flex-1 min-w-0">{children}</div>
     </div>
   );
 }
@@ -25,6 +27,8 @@ const VIDE = {
 
 export default function Settings() {
   const toast = useToast();
+  const navigate = useNavigate();
+  const { logout } = useAuth();
   const [form, setForm] = useState(VIDE);
   const [pw, setPw] = useState({ current: '', nouveau: '', confirm: '' });
   const [loading, setLoading] = useState(false);
@@ -88,124 +92,115 @@ export default function Settings() {
     }
   };
 
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
   return (
-    <div className="p-4 md:p-6 max-w-2xl space-y-5">
-      <h1 className="text-xl font-semibold text-gray-900">Paramètres</h1>
+    <div className="p-4 space-y-6">
+      <h1 className="text-[22px] font-extrabold tracking-tightest text-ink px-1 pt-1">Réglages</h1>
 
-      {/* ── Entreprise ── */}
-      <form onSubmit={handleSubmit} className="space-y-5">
-        <Section title="Mon entreprise">
-          <Field label="Nom de l'entreprise">
-            <input className={cls} value={form.entreprise.nom} onChange={setEnt('nom')} />
-          </Field>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Field label="Email">
-              <input type="email" className={cls} value={form.entreprise.email} onChange={setEnt('email')} />
-            </Field>
-            <Field label="Téléphone">
-              <input className={cls} value={form.entreprise.telephone} onChange={setEnt('telephone')} />
-            </Field>
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Entreprise */}
+        <div>
+          <p className={sectionLabel}>Mon entreprise</p>
+          <div className={groupCls}>
+            <Row label="Nom"><input className={rowInput} value={form.entreprise.nom} onChange={setEnt('nom')} placeholder="—" /></Row>
+            <Row label="Email"><input type="email" className={rowInput} value={form.entreprise.email} onChange={setEnt('email')} placeholder="—" /></Row>
+            <Row label="Téléphone"><input className={rowInput} value={form.entreprise.telephone} onChange={setEnt('telephone')} placeholder="—" /></Row>
+            <Row label="SIRET"><input className={rowInput} value={form.entreprise.siret} onChange={setEnt('siret')} placeholder="—" /></Row>
+            <Row label="Rue"><input className={rowInput} value={form.entreprise.adresse.rue} onChange={setAddr('rue')} placeholder="—" /></Row>
+            <Row label="Code postal"><input className={rowInput} value={form.entreprise.adresse.codePostal} onChange={setAddr('codePostal')} placeholder="—" /></Row>
+            <Row label="Ville"><input className={rowInput} value={form.entreprise.adresse.ville} onChange={setAddr('ville')} placeholder="—" /></Row>
+            <Row label="Pays"><input className={rowInput} value={form.entreprise.adresse.pays} onChange={setAddr('pays')} placeholder="—" /></Row>
           </div>
-          <Field label="SIRET">
-            <input className={cls} value={form.entreprise.siret} onChange={setEnt('siret')} />
-          </Field>
-          <div className="border-t border-gray-100 pt-3 space-y-3">
-            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Adresse</p>
-            <Field label="Rue">
-              <input className={cls} value={form.entreprise.adresse.rue} onChange={setAddr('rue')} />
-            </Field>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              <Field label="Code postal">
-                <input className={cls} value={form.entreprise.adresse.codePostal} onChange={setAddr('codePostal')} />
-              </Field>
-              <div className="col-span-1 sm:col-span-2">
-                <Field label="Ville">
-                  <input className={cls} value={form.entreprise.adresse.ville} onChange={setAddr('ville')} />
-                </Field>
-              </div>
+        </div>
+
+        {/* Logo */}
+        <div>
+          <p className={sectionLabel}>Logo</p>
+          <div className={groupCls}>
+            <div className="px-4 py-3 space-y-3">
+              <input type="file" accept="image/*" onChange={handleLogo}
+                className="text-sm text-muted file:mr-3 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-accent-soft file:text-accent" />
+              {form.logo && (
+                <div className="flex items-center gap-3">
+                  <img src={form.logo} alt="Logo" className="h-16 object-contain bg-page rounded-[12px] p-1" />
+                  <button type="button" onClick={() => setForm((f) => ({ ...f, logo: '' }))}
+                    className="text-xs font-semibold text-danger">Supprimer</button>
+                </div>
+              )}
             </div>
-            <Field label="Pays">
-              <input className={cls} value={form.entreprise.adresse.pays} onChange={setAddr('pays')} />
-            </Field>
           </div>
-        </Section>
+        </div>
 
-        {/* ── Logo ── */}
-        <Section title="Logo">
-          <input type="file" accept="image/*" onChange={handleLogo} className="text-sm text-gray-600" />
-          {form.logo && (
-            <div className="flex items-center gap-3 mt-2">
-              <img src={form.logo} alt="Logo" className="h-16 object-contain border border-gray-100 rounded-lg" />
-              <button type="button" onClick={() => setForm((f) => ({ ...f, logo: '' }))}
-                className="text-xs text-red-500 hover:underline">Supprimer</button>
-            </div>
-          )}
-        </Section>
-
-        {/* ── Numérotation ── */}
-        <Section title="Numérotation des devis">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Field label="Préfixe" hint={`Exemple : DEV → DEV-2026-001`}>
-              <input className={cls} value={form.prefixeNumero}
-                onChange={(e) => setForm((f) => ({ ...f, prefixeNumero: e.target.value.toUpperCase() }))}
-                maxLength={10} />
-            </Field>
-            <Field label="Délai d'expiration par défaut (jours)" hint="Pré-remplit la date sur les nouveaux devis">
-              <input type="number" min="0" max="365" className={cls} value={form.delaiExpirationDefaut}
+        {/* Numérotation */}
+        <div>
+          <p className={sectionLabel}>Numérotation des devis</p>
+          <div className={groupCls}>
+            <Row label="Préfixe">
+              <input className={rowInput} value={form.prefixeNumero} maxLength={10}
+                onChange={(e) => setForm((f) => ({ ...f, prefixeNumero: e.target.value.toUpperCase() }))} />
+            </Row>
+            <Row label="Délai d'expiration (jours)">
+              <input type="number" min="0" max="365" className={rowInput} value={form.delaiExpirationDefaut}
                 onChange={(e) => setForm((f) => ({ ...f, delaiExpirationDefaut: Number(e.target.value) }))} />
-            </Field>
+            </Row>
           </div>
-        </Section>
+          <p className="px-1 mt-2 text-xs text-muted">Exemple : {form.prefixeNumero || 'DEV'}-2026-001</p>
+        </div>
 
-        {/* ── Mentions légales ── */}
-        <Section title="Mentions légales & conditions par défaut"
-          subtitle="Pré-remplies dans les nouveaux devis et affichées en pied de page PDF.">
-          <textarea rows={5} value={form.mentionsLegalesDefaut}
-            onChange={(e) => setForm((f) => ({ ...f, mentionsLegalesDefaut: e.target.value }))}
-            className={`${cls} resize-none`} />
-        </Section>
+        {/* Mentions légales */}
+        <div>
+          <p className={sectionLabel}>Mentions légales &amp; conditions</p>
+          <div className={groupCls}>
+            <div className="px-4 py-3">
+              <textarea rows={5} value={form.mentionsLegalesDefaut}
+                onChange={(e) => setForm((f) => ({ ...f, mentionsLegalesDefaut: e.target.value }))}
+                placeholder="Pré-remplies dans les nouveaux devis et affichées en pied de page PDF."
+                className="w-full bg-transparent border-0 p-0 text-[15px] text-ink placeholder:text-faint resize-y focus:outline-none" />
+            </div>
+          </div>
+        </div>
 
         <button type="submit" disabled={loading}
-          className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-medium px-5 py-2 rounded-lg text-sm">
+          className="w-full bg-accent-gradient text-white font-semibold py-3.5 rounded-field shadow-fab active:scale-[0.99] transition-transform disabled:opacity-50">
           {loading ? 'Enregistrement…' : 'Enregistrer les paramètres'}
         </button>
       </form>
 
-      {/* ── Mot de passe ── */}
-      <form onSubmit={handleChangePassword} className="space-y-4">
-        <Section title="Changer le mot de passe">
-          <div className="space-y-3">
-            <Field label="Mot de passe actuel">
-              <input type="password" required className={cls} value={pw.current}
-                onChange={(e) => setPw((p) => ({ ...p, current: e.target.value }))} />
-            </Field>
-            <Field label="Nouveau mot de passe">
-              <input type="password" required className={cls} value={pw.nouveau}
-                onChange={(e) => setPw((p) => ({ ...p, nouveau: e.target.value }))} />
-            </Field>
-            <Field label="Confirmer le nouveau mot de passe">
-              <input type="password" required className={cls} value={pw.confirm}
-                onChange={(e) => setPw((p) => ({ ...p, confirm: e.target.value }))} />
-            </Field>
-          </div>
-          <button type="submit" disabled={pwLoading}
-            className="mt-1 bg-gray-800 hover:bg-gray-900 disabled:opacity-50 text-white font-medium px-5 py-2 rounded-lg text-sm">
-            {pwLoading ? 'Modification…' : 'Changer le mot de passe'}
-          </button>
-        </Section>
+      {/* Mot de passe */}
+      <form onSubmit={handleChangePassword}>
+        <p className={sectionLabel}>Sécurité</p>
+        <div className={groupCls}>
+          <Row label="Mot de passe actuel">
+            <input type="password" required className={rowInput} value={pw.current}
+              onChange={(e) => setPw((p) => ({ ...p, current: e.target.value }))} placeholder="••••••" />
+          </Row>
+          <Row label="Nouveau mot de passe">
+            <input type="password" required className={rowInput} value={pw.nouveau}
+              onChange={(e) => setPw((p) => ({ ...p, nouveau: e.target.value }))} placeholder="8 car. min." />
+          </Row>
+          <Row label="Confirmer">
+            <input type="password" required className={rowInput} value={pw.confirm}
+              onChange={(e) => setPw((p) => ({ ...p, confirm: e.target.value }))} placeholder="••••••" />
+          </Row>
+        </div>
+        <button type="submit" disabled={pwLoading}
+          className="w-full mt-3 bg-ink text-white font-semibold py-3.5 rounded-field active:scale-[0.99] transition-transform disabled:opacity-50">
+          {pwLoading ? 'Modification…' : 'Changer le mot de passe'}
+        </button>
       </form>
-    </div>
-  );
-}
 
-function Section({ title, subtitle, children }) {
-  return (
-    <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-4">
+      {/* Compte */}
       <div>
-        <h2 className="text-sm font-semibold text-gray-700">{title}</h2>
-        {subtitle && <p className="text-xs text-gray-400 mt-0.5">{subtitle}</p>}
+        <p className={sectionLabel}>Compte</p>
+        <button onClick={handleLogout}
+          className="w-full bg-surface rounded-[18px] shadow-soft px-4 py-3.5 text-sm font-semibold text-danger">
+          Déconnexion
+        </button>
       </div>
-      {children}
     </div>
   );
 }
