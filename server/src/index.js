@@ -16,6 +16,7 @@ const auth = require('./middleware/auth');
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/clients', auth, require('./routes/clients'));
 app.use('/api/devis', auth, require('./routes/devis'));
+app.use('/api/notes', auth, require('./routes/notes'));
 app.use('/api/settings', auth, require('./routes/settings'));
 
 // Connexion MongoDB avec cache (important pour Vercel serverless)

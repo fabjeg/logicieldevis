@@ -13,8 +13,8 @@ const iconProps = {
 };
 
 const Icons = {
-  rapide: (p) => (
-    <svg {...iconProps} {...p}><path d="M13 2 4.5 13.5H11l-1 8.5 8.5-11.5H12l1-8.5Z" /></svg>
+  notes: (p) => (
+    <svg {...iconProps} {...p}><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" /></svg>
   ),
   devis: (p) => (
     <svg {...iconProps} {...p}>
@@ -41,7 +41,7 @@ const Icons = {
 };
 
 const NAV = [
-  { to: '/devis/rapide', label: 'Rapide', icon: 'rapide' },
+  { to: '/notes', label: 'Notes', icon: 'notes' },
   { to: '/devis', label: 'Devis', icon: 'devis', end: true },
   { to: '/clients', label: 'Clients', icon: 'clients' },
   { to: '/dashboard', label: 'Bilan', icon: 'bilan' },
@@ -50,6 +50,7 @@ const NAV = [
 
 // Écrans où l'on propose un bouton flottant de création
 const FAB_ROUTES = {
+  '/notes': '/notes/nouvelle',
   '/devis': '/devis/nouveau',
   '/clients': '/clients/nouveau',
 };

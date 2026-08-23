@@ -10,8 +10,9 @@ import ClientForm from './pages/ClientForm';
 import ClientDetail from './pages/ClientDetail';
 import DevisList from './pages/DevisList';
 import DevisForm from './pages/DevisForm';
-import DevisRapide from './pages/DevisRapide';
 import DevisPrixPro from './pages/DevisPrixPro';
+import NotesList from './pages/NotesList';
+import NoteForm from './pages/NoteForm';
 import Settings from './pages/Settings';
 
 export default function App() {
@@ -34,8 +35,10 @@ export default function App() {
               <Route path="/clients/nouveau" element={<ClientForm />} />
               <Route path="/clients/:id" element={<ClientDetail />} />
               <Route path="/clients/:id/modifier" element={<ClientForm />} />
+              <Route path="/notes" element={<NotesList />} />
+              <Route path="/notes/nouvelle" element={<NoteForm />} />
+              <Route path="/notes/:id" element={<NoteForm />} />
               <Route path="/devis" element={<DevisList />} />
-              <Route path="/devis/rapide" element={<DevisRapide />} />
               <Route path="/devis/nouveau" element={<DevisForm />} />
               <Route path="/devis/:id/modifier" element={<DevisForm />} />
               <Route path="/devis/:id/prix-pro" element={<DevisPrixPro />} />
