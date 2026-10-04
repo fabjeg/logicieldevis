@@ -23,6 +23,15 @@ const ligneSchema = new Schema(
   { _id: false }
 );
 
+// Lignes indicatives (ex-« Notes »), affichées après le solde, montants modifiables
+const recapCesuSchema = new Schema(
+  {
+    libelle: { type: String, default: '' },
+    montant: { type: Number, default: 0 },
+  },
+  { _id: false }
+);
+
 const devisSchema = new Schema(
   {
     userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
@@ -37,6 +46,8 @@ const devisSchema = new Schema(
       default: 'brouillon',
     },
     lignes: { type: [ligneSchema], default: [] },
+    descriptionTravaux: { type: String, default: '' },
+    recapCesu: { type: [recapCesuSchema], default: [] },
     notes: { type: String, default: '' },
     conditionsGenerales: { type: String, default: '' },
     totalHT: { type: Number, default: 0 },

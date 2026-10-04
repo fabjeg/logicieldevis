@@ -77,7 +77,7 @@ router.get('/', async (req, res) => {
 // ── Créer ────────────────────────────────────────────────────────────────────
 router.post('/', async (req, res) => {
   try {
-    const { clientId, dateExpiration, statut, lignes, notes, conditionsGenerales, acompte } = req.body;
+    const { clientId, dateExpiration, statut, lignes, descriptionTravaux, recapCesu, notes, conditionsGenerales, acompte } = req.body;
 
     const client = await Client.findOne({ _id: clientId, userId: req.user.id });
     if (!client) return res.status(404).json({ message: 'Client introuvable' });
@@ -98,6 +98,8 @@ router.post('/', async (req, res) => {
       dateExpiration: dateExpiration || null,
       statut: statut || 'brouillon',
       lignes: lignes || [],
+      descriptionTravaux: descriptionTravaux || '',
+      recapCesu: recapCesu || [],
       notes: notes || '',
       conditionsGenerales: conditionsGenerales || '',
       acompte: acompte || 0,
@@ -122,6 +124,8 @@ router.post('/:id/dupliquer', async (req, res) => {
       dateExpiration: null,
       statut: 'brouillon',
       lignes: original.lignes,
+      descriptionTravaux: original.descriptionTravaux,
+      recapCesu: original.recapCesu,
       notes: original.notes,
       conditionsGenerales: original.conditionsGenerales,
       acompte: original.acompte,
@@ -150,7 +154,7 @@ router.put('/:id', async (req, res) => {
     const devis = await Devis.findOne({ _id: req.params.id, userId: req.user.id });
     if (!devis) return res.status(404).json({ message: 'Devis introuvable' });
 
-    const { clientId, dateExpiration, statut, lignes, notes, conditionsGenerales, acompte } = req.body;
+    const { clientId, dateExpiration, statut, lignes, descriptionTravaux, recapCesu, notes, conditionsGenerales, acompte } = req.body;
 
     if (clientId && String(clientId) !== String(devis.client)) {
       const client = await Client.findOne({ _id: clientId, userId: req.user.id });
@@ -166,6 +170,8 @@ router.put('/:id', async (req, res) => {
     if (dateExpiration !== undefined) devis.dateExpiration = dateExpiration || null;
     if (statut !== undefined) devis.statut = statut;
     if (lignes !== undefined) devis.lignes = lignes;
+    if (descriptionTravaux !== undefined) devis.descriptionTravaux = descriptionTravaux;
+    if (recapCesu !== undefined) devis.recapCesu = recapCesu;
     if (notes !== undefined) devis.notes = notes;
     if (conditionsGenerales !== undefined) devis.conditionsGenerales = conditionsGenerales;
     if (acompte !== undefined) devis.acompte = acompte;

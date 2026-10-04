@@ -3,8 +3,15 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import api from '../services/api';
 import { useToast } from '../context/ToastContext';
 
-const LIGNE_VIDE = { description: '', quantite: 1, prixUnitaireHT: 0, tauxTVA: 20 };
-const NOTES_DEFAUT = `travaux effectué en CESU.\nà titre indicatif:\nsalaire net versé au salarié: 690€\nCotisations sociales prélevées à l'employeur: 547.04€\nAvantage fiscal pour l'employeur: 618.52€\nCoût réel pour l'employeur: 618.52€\nsur la mains d'œuvre`;
+const LIGNE_VIDE = { description: '', quantite: 1, prixUnitaireHT: 0, tauxTVA: 0 };
+const NOTES_DEFAUT = `travaux effectué en CESU.`;
+const CONDITIONS_DEFAUT = `Les prix sont établis sur la base des tarifs matériaux en vigueur à la date du devis. En cas de hausse de ces derniers, nous nous réservons le droit de facturer un supplément correspondant`;
+const RECAP_CESU_DEFAUT = [
+  { libelle: 'Salaire net versé au salarié', montant: 690 },
+  { libelle: "Cotisations sociales prélevées à l'employeur", montant: 547.04 },
+  { libelle: "Avantage fiscal pour l'employeur", montant: 618.52 },
+  { libelle: "Coût réel pour l'employeur", montant: 618.52 },
+];
 const STATUTS = ['brouillon', 'envoyé', 'accepté', 'refusé'];
 
 const euros = (n) =>
@@ -31,6 +38,8 @@ export default function DevisForm() {
     dateExpiration: '',
     statut: 'brouillon',
     lignes: [{ ...LIGNE_VIDE }],
+    descriptionTravaux: '',
+    recapCesu: RECAP_CESU_DEFAUT.map((r) => ({ ...r })),
     notes: NOTES_DEFAUT,
     conditionsGenerales: '',
     acompte: 0,
@@ -52,6 +61,8 @@ export default function DevisForm() {
           dateExpiration: d.dateExpiration ? d.dateExpiration.slice(0, 10) : '',
           statut: d.statut,
           lignes: d.lignes.length > 0 ? d.lignes : [{ ...LIGNE_VIDE }],
+          descriptionTravaux: d.descriptionTravaux || '',
+          recapCesu: (d.recapCesu && d.recapCesu.length > 0) ? d.recapCesu : [],
           notes: d.notes || '',
           conditionsGenerales: d.conditionsGenerales || '',
           acompte: d.acompte || 0,
@@ -63,7 +74,7 @@ export default function DevisForm() {
         setForm((f) => ({
           ...f,
           dateExpiration: expDate.toISOString().slice(0, 10),
-          conditionsGenerales: s.mentionsLegalesDefaut || '',
+          conditionsGenerales: s.mentionsLegalesDefaut || CONDITIONS_DEFAUT,
         }));
       }
     });
@@ -93,6 +104,13 @@ export default function DevisForm() {
       return { ...f, lignes };
     });
 
+  const setRecapMontant = (i) => (e) =>
+    setForm((f) => {
+      const recapCesu = [...f.recapCesu];
+      recapCesu[i] = { ...recapCesu[i], montant: e.target.value };
+      return { ...f, recapCesu };
+    });
+
   const ajouterLigne = () =>
     setForm((f) => ({ ...f, lignes: [...f.lignes, { ...LIGNE_VIDE }] }));
 
@@ -112,6 +130,10 @@ export default function DevisForm() {
           quantite: Number(l.quantite),
           prixUnitaireHT: Number(l.prixUnitaireHT),
           tauxTVA: Number(l.tauxTVA),
+        })),
+        recapCesu: form.recapCesu.map((r) => ({
+          ...r,
+          montant: Number(r.montant),
         })),
       };
       if (isEdit) {
@@ -166,6 +188,17 @@ export default function DevisForm() {
           </div>
         </div>
 
+        {/* Description des travaux effectués */}
+        <div className="space-y-3">
+          <p className={sectionLabel}>Description des travaux effectués</p>
+          <label className={fieldCard}>
+            <span className={labelCls}>Description</span>
+            <textarea rows={5} value={form.descriptionTravaux} onChange={setField('descriptionTravaux')}
+              placeholder="Décrivez les travaux réalisés… (visible sur le PDF)"
+              className={`${inputCls} resize-y`} />
+          </label>
+        </div>
+
         {/* Lignes */}
         <div className="space-y-3">
           <div className="flex items-center justify-between px-1">
@@ -195,7 +228,7 @@ export default function DevisForm() {
                     </button>
                   )}
                 </div>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-2 gap-2">
                   <div className={chipField}>
                     <span className={chipLabel}>Qté</span>
                     <input type="number" min="0" step="0.01" value={l.quantite} onChange={setLigne(i, 'quantite')} className={chipInput} />
@@ -203,10 +236,6 @@ export default function DevisForm() {
                   <div className={chipField}>
                     <span className={chipLabel}>PU HT (€)</span>
                     <input type="number" min="0" step="0.01" value={l.prixUnitaireHT} onChange={setLigne(i, 'prixUnitaireHT')} className={chipInput} />
-                  </div>
-                  <div className={chipField}>
-                    <span className={chipLabel}>TVA %</span>
-                    <input type="number" min="0" max="100" step="0.1" value={l.tauxTVA} onChange={setLigne(i, 'tauxTVA')} className={chipInput} />
                   </div>
                 </div>
                 <p className="text-right text-sm font-semibold text-ink tnum">Total HT : {euros(totalLigne)}</p>
@@ -221,12 +250,8 @@ export default function DevisForm() {
             <span className="text-muted">Total HT</span>
             <span className="font-semibold text-ink tnum">{euros(totaux.totalHT)}</span>
           </div>
-          <div className="flex justify-between text-sm">
-            <span className="text-muted">TVA</span>
-            <span className="font-semibold text-ink tnum">{euros(totaux.totalTVA)}</span>
-          </div>
           <div className="flex justify-between pt-2.5 border-t border-page items-center">
-            <span className="text-sm font-semibold text-ink">Total TTC</span>
+            <span className="text-sm font-semibold text-ink">Total hors charge</span>
             <span className="text-lg font-extrabold text-accent tnum">{euros(totaux.totalTTC)}</span>
           </div>
           <div className="flex items-center justify-between pt-2.5 border-t border-page gap-3">
@@ -247,6 +272,31 @@ export default function DevisForm() {
             </div>
           )}
         </div>
+
+        {/* Récapitulatif à titre indicatif (sur la main d'œuvre) */}
+        {form.recapCesu.length > 0 && (
+          <div className="space-y-3">
+            <p className={sectionLabel}>À titre indicatif (sur la main d&apos;œuvre)</p>
+            <div className="bg-surface rounded-card shadow-soft p-4 space-y-2.5">
+              {form.recapCesu.map((r, i) => (
+                <div key={i} className="flex items-center justify-between gap-3">
+                  <span className="text-sm text-muted">{r.libelle}</span>
+                  <div className="flex items-center gap-1.5 flex-shrink-0">
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={r.montant}
+                      onChange={setRecapMontant(i)}
+                      className="w-28 bg-page rounded-[12px] px-3 py-2 text-sm text-right text-ink focus:outline-none"
+                    />
+                    <span className="text-sm text-muted">€</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Notes & conditions */}
         <div className="space-y-3">

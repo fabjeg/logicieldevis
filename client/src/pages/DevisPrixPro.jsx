@@ -6,6 +6,12 @@ import { useToast } from '../context/ToastContext';
 const euros = (n) =>
   new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(n || 0);
 
+// Parse un montant saisi (accepte la virgule décimale, champ vide => 0)
+const toNum = (v) => {
+  const n = parseFloat(String(v ?? '').replace(',', '.'));
+  return Number.isFinite(n) ? n : 0;
+};
+
 const cls =
   'border border-gray-300 rounded-lg px-3 py-2 text-sm text-right focus:outline-none focus:ring-2 focus:ring-emerald-500';
 
@@ -22,7 +28,7 @@ export default function DevisPrixPro() {
   useEffect(() => {
     api.get(`/devis/${id}`).then(({ data }) => {
       setDevis(data);
-      setLignes(data.lignes.map((l) => ({ ...l, prixProHT: l.prixProHT || 0 })));
+      setLignes(data.lignes.map((l) => ({ ...l, prixProHT: l.prixProHT ? String(l.prixProHT) : '' })));
       setLoading(false);
     });
   }, [id]);
@@ -38,7 +44,7 @@ export default function DevisPrixPro() {
     let coutTotal = 0;
     let clientTotal = 0;
     for (const l of lignes) {
-      coutTotal += (Number(l.quantite) || 0) * (Number(l.prixProHT) || 0);
+      coutTotal += (Number(l.quantite) || 0) * toNum(l.prixProHT);
       clientTotal += (Number(l.quantite) || 0) * (Number(l.prixUnitaireHT) || 0);
     }
     const marge = clientTotal - coutTotal;
@@ -59,8 +65,8 @@ export default function DevisPrixPro() {
           description: l.description,
           quantite: Number(l.quantite),
           prixUnitaireHT: Number(l.prixUnitaireHT),
-          tauxTVA: Number(l.tauxTVA),
-          prixProHT: Number(l.prixProHT) || 0,
+          tauxTVA: Number(l.tauxTVA) || 0,
+          prixProHT: toNum(l.prixProHT),
         })),
       });
       toast.success('Prix pro enregistrés');
@@ -101,15 +107,15 @@ export default function DevisPrixPro() {
         {/* Mobile : cartes */}
         <div className="sm:hidden divide-y divide-gray-100">
           {lignes.map((l, i) => {
-            const coutLigne = (Number(l.quantite) || 0) * (Number(l.prixProHT) || 0);
+            const coutLigne = (Number(l.quantite) || 0) * toNum(l.prixProHT);
             const clientLigne = (Number(l.quantite) || 0) * (Number(l.prixUnitaireHT) || 0);
             return (
               <div key={i} className="p-4 space-y-2">
                 <p className="text-sm text-gray-800">{l.description}</p>
                 <p className="text-xs text-gray-400">Qté {l.quantite} · Prix client {euros(l.prixUnitaireHT)}/u</p>
                 <div className="flex items-center justify-between gap-3">
-                  <label className="text-xs text-gray-500">Prix pro HT (€/u)</label>
-                  <input type="number" min="0" step="0.01" value={l.prixProHT} onChange={setPrixPro(i)} className={`w-28 ${cls}`} />
+                  <label className="text-xs text-gray-500">Prix pro TTC (€/u)</label>
+                  <input type="text" inputMode="decimal" value={l.prixProHT} onChange={setPrixPro(i)} placeholder="0" className={`w-28 ${cls}`} />
                 </div>
                 <div className="flex justify-between text-xs pt-1 border-t border-gray-100">
                   <span className="text-gray-400">Coût : {euros(coutLigne)}</span>
@@ -126,15 +132,15 @@ export default function DevisPrixPro() {
             <tr className="text-xs text-gray-400 bg-gray-50 border-b border-gray-100">
               <th className="text-left px-4 py-2">Description</th>
               <th className="text-right px-2 py-2 w-16">Qté</th>
-              <th className="text-right px-2 py-2 w-28">Prix client HT</th>
-              <th className="text-right px-2 py-2 w-32">Prix pro HT</th>
+              <th className="text-right px-2 py-2 w-28">Prix client TTC</th>
+              <th className="text-right px-2 py-2 w-32">Prix pro TTC</th>
               <th className="text-right px-2 py-2 w-28">Coût total</th>
               <th className="text-right px-4 py-2 w-28">Marge</th>
             </tr>
           </thead>
           <tbody>
             {lignes.map((l, i) => {
-              const coutLigne = (Number(l.quantite) || 0) * (Number(l.prixProHT) || 0);
+              const coutLigne = (Number(l.quantite) || 0) * toNum(l.prixProHT);
               const clientLigne = (Number(l.quantite) || 0) * (Number(l.prixUnitaireHT) || 0);
               const margeLigne = clientLigne - coutLigne;
               return (
@@ -143,7 +149,7 @@ export default function DevisPrixPro() {
                   <td className="px-2 py-2 text-right text-gray-500">{l.quantite}</td>
                   <td className="px-2 py-2 text-right text-gray-500">{euros(l.prixUnitaireHT)}</td>
                   <td className="px-2 py-2">
-                    <input type="number" min="0" step="0.01" value={l.prixProHT} onChange={setPrixPro(i)} className={`w-full ${cls}`} />
+                    <input type="text" inputMode="decimal" value={l.prixProHT} onChange={setPrixPro(i)} placeholder="0" className={`w-28 ${cls}`} />
                   </td>
                   <td className="px-2 py-2 text-right text-gray-500">{euros(coutLigne)}</td>
                   <td className={`px-4 py-2 text-right font-medium ${margeLigne >= 0 ? 'text-emerald-700' : 'text-red-600'}`}>
@@ -158,11 +164,11 @@ export default function DevisPrixPro() {
         {/* Totaux */}
         <div className="px-4 py-4 border-t border-gray-100 bg-gray-50 flex flex-col sm:items-end gap-1.5 text-sm">
           <div className="flex justify-between w-full sm:w-72 text-gray-500">
-            <span>Total coût pro HT</span>
+            <span>Total coût pro TTC</span>
             <span className="font-medium text-gray-800">{euros(totaux.coutTotal)}</span>
           </div>
           <div className="flex justify-between w-full sm:w-72 text-gray-500">
-            <span>Total client HT</span>
+            <span>Total client TTC</span>
             <span className="font-medium text-gray-800">{euros(totaux.clientTotal)}</span>
           </div>
           <div className={`flex justify-between w-full sm:w-72 pt-1.5 border-t border-gray-200 font-semibold ${totaux.marge >= 0 ? 'text-emerald-700' : 'text-red-600'}`}>
