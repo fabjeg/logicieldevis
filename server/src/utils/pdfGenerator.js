@@ -32,8 +32,8 @@ function dessinerEnteteTableau(doc, y) {
   doc.text('#', COL.num, y + 7, { width: 20, align: 'center' });
   doc.text('Description', COL.desc, y + 7, { width: 255 });
   doc.text('Qté', COL.qty, y + 7, { width: 50, align: 'right' });
-  doc.text('PU HT', COL.pu, y + 7, { width: 65, align: 'right' });
-  doc.text('Total HT', COL.total, y + 7, { width: 60, align: 'right' });
+  doc.text('PU', COL.pu, y + 7, { width: 65, align: 'right' });
+  doc.text('Total', COL.total, y + 7, { width: 60, align: 'right' });
   return y + 22;
 }
 
@@ -161,9 +161,7 @@ function genererPDF(devis, settings, stream) {
     y += highlight ? 22 : 17;
   };
 
-  drawRow('Total HT :', euros(devis.totalHT));
-
-  drawRow('Total hors charge :', euros(devis.totalTTC), true);
+  drawRow('Total TTC :', euros(devis.totalTTC), true);
 
   // Acompte et reste à payer
   if (devis.acompte > 0) {

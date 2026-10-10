@@ -246,12 +246,8 @@ export default function DevisForm() {
 
         {/* Totaux */}
         <div className="bg-surface rounded-card shadow-soft p-4 space-y-2.5">
-          <div className="flex justify-between text-sm">
-            <span className="text-muted">Total HT</span>
-            <span className="font-semibold text-ink tnum">{euros(totaux.totalHT)}</span>
-          </div>
-          <div className="flex justify-between pt-2.5 border-t border-page items-center">
-            <span className="text-sm font-semibold text-ink">Total hors charge</span>
+          <div className="flex justify-between items-center">
+            <span className="text-sm font-semibold text-ink">Total TTC</span>
             <span className="text-lg font-extrabold text-accent tnum">{euros(totaux.totalTTC)}</span>
           </div>
           <div className="flex items-center justify-between pt-2.5 border-t border-page gap-3">
